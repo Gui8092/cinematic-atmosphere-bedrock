@@ -418,6 +418,87 @@ if ($baseline.source.tag -and $baseline.source.license) {
     Ok "baseline declara licenca da referencia: $($baseline.source.license)"
 } else { Fail 'baseline sem metadados de procedencia/licenca' }
 
+# --- codificacao dos scripts: PowerShell 5.1 le .ps1 SEM BOM como ANSI, o que
+# corrompe acentos e pode quebrar o parsing de literais. Ja causou bug real.
+$bomOk = 0; $bomBad = @()
+foreach ($f in Get-ChildItem $root -Recurse -Filter *.ps1 -File) {
+    $b = [System.IO.File]::ReadAllBytes($f.FullName)
+    $hasBom = ($b.Length -ge 3 -and $b[0] -eq 0xEF -and $b[1] -eq 0xBB -and $b[2] -eq 0xBF)
+    if ($hasBom) { $bomOk++ } else { $bomBad += $f.Name }
+}
+if ($bomBad.Count -eq 0) { Ok "todos os $bomOk scripts .ps1 estao em UTF-8 COM BOM (obrigatorio para o PowerShell 5.1)" }
+else { Fail "sem BOM UTF-8 (o PowerShell 5.1 vai corromper acentos): $($bomBad -join ', ')" }
+
+# --- o .mcpack publicado precisa corresponder ao source
+$mcpack = Join-Path $root 'dist\Cinematic_Atmosphere_Bedrock.mcpack'
+if (Test-Path $mcpack) {
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    $zip = [System.IO.Compression.ZipFile]::OpenRead($mcpack)
+    try {
+        $entry = $zip.Entries | Where-Object { $_.FullName -eq 'manifest.json' }
+        if (-not $entry) {
+            Fail 'dist: manifest.json ausente na raiz do .mcpack'
+        } else {
+            $sr = New-Object System.IO.StreamReader($entry.Open())
+            $pm = ($sr.ReadToEnd() | ConvertFrom-Json)
+            $sr.Close()
+            # NOTA: parenthesizar e obrigatorio. "a -join '.' -eq b -join '.'"
+            # depende de precedencia entre operadores e ja falhou em detectar
+            # uma divergencia real de versao durante a auditoria.
+            $packVer = (@($pm.header.version) -join '.')
+            $srcVer  = (@($m.header.version)   -join '.')
+            if ($packVer -eq $srcVer) {
+                Ok "dist: .mcpack na versao $packVer, igual ao source"
+            } else {
+                Fail "dist: .mcpack esta na versao $packVer mas o source esta em $srcVer - rode build.ps1"
+            }
+
+            $packMev = (@($pm.header.min_engine_version) -join '.')
+            $srcMev  = (@($h.min_engine_version)            -join '.')
+            if ($packMev -eq $srcMev) {
+                Ok "dist: min_engine_version conferido ($packMev)"
+            } else {
+                Fail "dist: min_engine_version do pacote ($packMev) difere do source ($srcMev) - rode build.ps1"
+            }
+        }
+        # o manifesto do pacote deve bater com o do do source.
+        # Comparacao NORMALIZADA (CRLF -> LF): o que importa e se a configuracao
+        # publicada corresponde ao source. Diferenca de fim de linha nao altera
+        # o comportamento no jogo e nao deve reprovar o build.
+        $sr2 = New-Object System.IO.StreamReader($zip.Entries.Where({$_.FullName -eq 'manifest.json'}).Open())
+        $raw = $sr2.ReadToEnd(); $sr2.Close()
+        $srcRaw = Get-Content -Raw -LiteralPath $manifestPath
+        $norm = { param($s) ($s -replace "`r`n", "`n").Trim() }
+        if (& $norm $raw -eq (& $norm $srcRaw)) { Ok 'dist: manifest.json do .mcpack e equivalente ao do source' }
+        else { Fail 'dist: manifest.json do .mcpack difere do source - artefato desatualizado' }
+
+        # consistencia de fim de linha nos fontes do pack
+        $crlfFiles = @()
+        foreach ($f in Get-ChildItem $pack -Recurse -Filter *.json -File) {
+            $b = [System.IO.File]::ReadAllBytes($f.FullName)
+            for ($i = 0; $i -lt $b.Length - 1; $i++) {
+                if ($b[$i] -eq 13 -and $b[$i + 1] -eq 10) { $crlfFiles += $f.Name; break }
+            }
+        }
+        if ($crlfFiles.Count -eq 0) { Ok 'pack: todos os .json usam LF (consistente com .gitattributes)' }
+        else { Warn "pack: $($crlfFiles.Count) .json com CRLF no working tree (o .gitattributes exige LF): $($crlfFiles[0..([Math]::Min(3,$crlfFiles.Count-1))] -join ', ')" }
+    } finally { $zip.Dispose() }
+} else {
+    Warn 'dist: .mcpack ausente (rode build.ps1 para gerar)'
+}
+
+# --- rampa vertical: o vanilla nunca usa. Nao e erro, mas precisa ser explicito.
+$vanillaRamp = @()
+foreach ($f in Get-ChildItem (Join-Path $pack 'fogs') -Filter *.json) {
+    $d = $parsed[$f.FullName].'minecraft:fog_settings'.volumetric.density.air
+    if (-not $d) { continue }
+    if ($d.PSObject.Properties['uniform']) { continue }
+    $z = [double]$d.zero_density_height; $m2 = [double]$d.max_density_height
+    if ($z -ne $m2) { $vanillaRamp += $f.Name }
+}
+Ok "fogs: $($vanillaRamp.Count) perfis com rampa vertical (original deste pack; o vanilla nunca usa): $($vanillaRamp -join ', ')"
+Ok "fogs: $(10 - $vanillaRamp.Count) perfis uniformes abaixo do teto (padrao do vanilla)"
+
 # ============================ resumo =======================================
 Write-Host ""
 Write-Host "=====================================================" -ForegroundColor Cyan

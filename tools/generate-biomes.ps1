@@ -34,8 +34,23 @@
 #>
 [CmdletBinding()]
 param(
-    [switch]$SyncBaseline
+    [switch]$SyncBaseline,
+    [switch]$Minimal
 )
+
+# -Minimal: escreve SOMENTE os componentes que este pack define (os 6
+# identificadores Vibrant Visuals). Produz um pack sem nenhum valor transcrito
+# da referencia oficial — util para quem prefere zero ambiguidade de licenca.
+#
+# ATENCAO: o tradeoff e real. Se o motor SUBSTITUI o client_biome vanilla em vez
+# de mesclar por componente, o modo -Minimal faz o bioma perder os componentes
+# que o jogo define:
+#     ambient_sounds (88/89 biomas), biome_music (56/89), water_appearance (89/89),
+#     grass_appearance (13), foliage_appearance (11), dry_foliage_color (7),
+#     sky_color (3), precipitation (4)
+# A documentacao da Mojang NAO informa qual das duas hipoteses vale.
+# O modo padrao (sem -Minimal) e seguro nas duas. Use -Minimal apenas se
+# aceitar esse risco em troca de zero conteudo transcrito.
 
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'biome-map.ps1')
@@ -165,9 +180,11 @@ foreach ($biome in $biomeIndex.Keys) {
     $fv = $entry.format_version
     if ([string]::IsNullOrWhiteSpace($fv)) { throw "$biome : baseline sem format_version." }
 
-    # --- componentes nao-visuais, verbatim do baseline
+    # --- componentes nao-visuais, verbatim do baseline (pulado em -Minimal)
     $comps = [ordered]@{}
-    foreach ($p in $entry.preserve.PSObject.Properties) { $comps[$p.Name] = $p.Value }
+    if (-not $Minimal) {
+        foreach ($p in $entry.preserve.PSObject.Properties) { $comps[$p.Name] = $p.Value }
+    }
 
     # --- identificadores Vibrant Visuals
     $comps['minecraft:fog_appearance'] = [ordered]@{ fog_identifier = $family.Fog }
@@ -208,6 +225,11 @@ foreach ($biome in $biomeIndex.Keys) {
 Write-Host "generate-biomes: $written arquivos escritos em resource_pack\biomes (esperado $expected)." -ForegroundColor Green
 $fvSet = @($baselineBiomes | ForEach-Object { $baseline.biomes.$_.format_version } | Sort-Object -Unique)
 Write-Host "format_version preservados da referencia: $($fvSet -join ', ')"
+if ($Minimal) {
+    Write-Host "MODO -MINIMAL: nenhum componente transcrito da referencia oficial foi escrito." -ForegroundColor Yellow
+    Write-Host "  O pack fica livre de valores da Mojang, mas biomas podem perder som, musica e cores" -ForegroundColor Yellow
+    Write-Host "  caso o motor substitua (em vez de mesclar) o client_biome vanilla. Ver o cabecalho do script." -ForegroundColor Yellow
+}
 if ($SyncBaseline) {
     Write-Host "Baseline atualizado de $($CbaVanillaRef.Repo)@$($CbaVanillaRef.Tag)." -ForegroundColor DarkGray
 } else {

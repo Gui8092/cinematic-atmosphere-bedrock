@@ -4,6 +4,118 @@ Todas as mudanças relevantes deste resource pack.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 Versionamento do pack segue SemVer no `manifest.json`.
 
+## [1.0.2] — 2026-10-05
+
+Resolução das pendências que **não** dependem de execução no Minecraft.
+**Nenhuma alteração visual ou direção artística.**
+
+### Pendência 2 resolvida — `local_lighting/` validado
+
+O motivo da omissão era "sem precedente no vanilla". A pesquisa refutou isso:
+
+- A documentação oficial define o caminho, o schema e o `format_version`
+  `1.21.120`.
+- Um schema JSON independente confirma `light_type` como **obrigatório**, com
+  enum `static_light` | `point_light`.
+- O template `vv_local_lighting.jsont` da ferramenta Anvil gera esse arquivo.
+- dozens de packs reais o utilizam, incluindo `Vanilla-Vibrant-Visuals`.
+
+**O caminho é válido.** A omissão passou a ser uma **decisão artística** — e não
+mais uma incerteza técnica. Como incluir mudaria a cor das tochas e lanternas, o
+arquivo continua **não incluído**, mas agora com uma **receita pronta e validada**
+no `README.md` §5.
+
+### Pendência sobre densidade de fog — agora auditável
+
+`tools/fog-report.ps1` (novo) calcula a densidade efetivo do fog em 11 alturas
+representativas e compara com as densidades medidas do vanilla `v1.26.50.4`.
+Torna a rampa vertical **auditável sem o jogo**, o que era impossível antes.
+
+A saída confirma o que a auditoria já indicava:
+
+- `cave`, `nether`, `end` → densidade **uniforme** até Y=320 (padrão do vanilla)
+- 7 perfis de superfície → **rampa vertical**, que o vanilla nunca usa
+- `fog_default` a Y=40 = 0.014, contra 0.05 do `humid` vanilla
+
+### Pendência sobre licença — opção sem valor transcrito
+
+`generate-biomes.ps1 -Minimal` gera os 89 biomas contendo **apenas** os 6
+identificadores Vibrant Visuals — zero valores transcritos da referência oficial.
+
+O tradeoff está documentado no cabeçalho do script e no `README.md` §5: se o
+motor **substituir** o `client_biome` vanilla em vez de mesclar por componente
+—a documentação não esclarece — os biomas perderiam som, música e cores. O modo
+padrão continua seguro nas duas hipóteses.
+
+### Pendência de codificação — causa raiz corrigida
+
+O PowerShell 5.1 lê `.ps1` **sem BOM** como ANSI. Isso já causou um erro real de
+parsing neste projeto.
+
+- `.editorconfig` (novo) declara `charset = utf-8-bom` para `*.ps1`
+- `.gitattributes` (novo) normaliza fim de linha para LF e marca `*.mcpack` como
+  binário
+- `validate.ps1` agora **verifica** que todo `.ps1` tem exatamente um BOM, e
+  alerta sobre `.json` com CRLF
+
+### Adicionado ao validador
+
+| Verificação | Motivo |
+|---|---|
+| Todo `.ps1` em UTF-8 **com BOM** | O bug acima passou despercebido duas vezes |
+| `.mcpack` em `dist/` tem a mesma versão do source | Detecta artefato desatualizado |
+| `min_engine_version` do pacote = do source | Idem |
+| `manifest.json` do pacote equivalente ao do source (normalizado) | Idem |
+| `.json` do pack usam LF | Consistente com `.gitattributes` |
+| Contagem de perfis com rampa vertical vs uniformes | Torna explícito o que diverge do vanilla |
+
+**Validação: 73 → 80 verificações.**
+
+### Bugs encontrados durante esta rodada
+
+1. `core.autocrlf = true` reescreveu o working tree com CRLF após um
+   `git reset --hard`, deixando o `manifest.json` do source divergente do que
+   estava no `.mcpack`. A verificação nova detectou. Comparação ajustada para
+   normalizar fim de linha (CRLF → LF), já que isso não altera o comportamento
+   no jogo, e o working tree foi normalizado para LF.
+
+2. Um script de normalização que escrevi aplicou **BOM duplo**
+   (`EF BB BF EF BB BF`) em 6 scripts PowerShell, quebrando o parsing de todos
+   eles. Corrigido, e a verificação de BOM agora exige **exatamente um**.
+
+3. **A verificação de versão do artefato não funcionava.** Escrevi
+   `$a -join '.' -eq $b -join '.'`, e por precedência entre `-join` e `-eq` a
+   comparação retornava o resultado errado: com o source em `9.9.9` e o pacote em
+   `1.0.2`, ela aprovava. Só percebi porque forcei uma divergência proposital.
+   Corrigido com parênteses explícitos e **testado nos dois sentidos**.
+
+Os três bugs são do mesmo tipo: verificações escritas sem prova de que falham.
+Por isso o `test-negative.ps1` existe e é obrigatório passar.
+
+### Também
+
+- Descrição do repositório GitHub corrigida com acentuação correta
+- 8 topics adicionados: `minecraft`, `minecraft-bedrock`, `resource-pack`,
+  `vibrant-visuals`, `lighting`, `atmosphere`, `color-grading`,
+  `volumetric-fog`
+
+### Validação
+
+| Execução | Verificações | Falhas | Avisos |
+|---|---:|---:|---:|
+| `validate.ps1` (offline) | 80 | 0 | 0 |
+| `validate.ps1 -CheckOfficial` | 82 | 0 | 0 |
+| `test-negative.ps1` | 29 | 0 | 0 |
+
+`.mcpack`: 130 entradas, CRC íntegro, APROVADO.
+
+### Pendente
+
+**Testes visuais e de desempenho continuam NÃO executados** — dependem do
+Minecraft instalado. Ver `docs/compatibility.md` §4.4.
+
+---
+
 ## [1.0.1] — 2026-10-05
 
 Correção de auditoria. **Cinco defeitos reais encontrados e corrigidos**,
