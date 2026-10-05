@@ -120,7 +120,7 @@ Todos os valores são planos e reversíveis. Reinicie o mundo ou use
 
 | Quer… | Arquivo | Mudança |
 |---|---|---|
-| Mais drama nas sombras | `color_grading\*.json` | `shadows.offset` de `±0.01` para `±0.02` |
+| Mais drama nas sombras | `color_grading\*.json` | `shadows.gain` — suba o canal azul (ex. `1.04` → `1.08`) para sombras mais frias; `offset` não é mais usado (zerado na v1.2.0, fora do spec oficial) |
 | Menos névoa em floresta | `fogs\forest.json` | `volumetric.density.air.max_density` de `0.026` para `0.018` |
 | Mais separação de planos nas montanhas | `fogs\mountain.json` | `distance.air.fog_start` de `0.62` para `0.52` |
 | Céu mais azul ao meio-dia | `atmospherics\atmospherics.json` | `sky_zenith_color["0.000000"]` → mais azul, ex. `[84,118,172]` |
@@ -129,6 +129,11 @@ Todos os valores são planos e reversíveis. Reinicie o mundo ou use
 | Cavernas mais escuras | `fogs\cave.json` | `max_density` de `0.055` para `0.075` |
 | **Ligar ondas na água** | `water\*.json` (todos, igual) | `waves.enabled` → `true` |
 | Voltar ao visual mais parecido com o vanilla | `color_grading\*.json` (todos, igual) | `tone_mapping.operator` → `"generic"` |
+
+> As receitas de ondas e de `tone_mapping` contrariam decisões aprovadas de
+> propósito — `validate.ps1` vai reprovar (`waves.enabled deveria ser false`,
+> `operator ... diferente de aces`). Isso é o validador fazendo o trabalho
+> dele, não um erro na sua edição.
 
 ### Receita: cor de luz de tochas e lanternas
 

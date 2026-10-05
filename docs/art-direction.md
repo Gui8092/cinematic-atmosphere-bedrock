@@ -11,7 +11,7 @@ atmosfera marcante, e a identidade visual do Minecraft preservada.
 > | Limite | Valor |
 > |---|---|
 > | Saturação | ≤ 1.06 (chegando a 0.94 no Nether) |
-> | Offset | ±0.03 |
+> | Offset | 0 (zerado na v1.2.0; o split-tone vive no `gain`) |
 > | Contraste | 1.10 – 1.22 |
 > | Gain | 0.93 – 1.02 |
 > | Gamma | 2.2 (padrão) |
@@ -152,15 +152,21 @@ completa.
 Todos os 7 arquivos de `color_grading/` têm `shadows` e `highlights` com
 `"enabled": true`, e é isso que separa "cubo de Minecraft" de "cena":
 
-| Família | `shadows.offset` (frio) | `highlights.offset` (quente) | Contraste | Temperatura |
+| Família | `shadows.gain` (frio) | `highlights.gain` (quente) | Contraste | Temperatura |
 |---|---|---|---|---|
-| `cg_overworld` | `[-0.010, -0.004, +0.012]` | `[+0.012, +0.004, -0.008]` | 1.12 | 6500 K |
-| `cg_cold` | `[-0.010, -0.004, +0.014]` | `[+0.004, +0.006, +0.012]` | 1.10 | 5200 K |
-| `cg_hot` | `[-0.006, -0.002, +0.008]` | `[+0.014, +0.004, -0.010]` | 1.14 | 7200 K |
-| `cg_swamp` | `[-0.008, 0.000, -0.002]` (verde) | `[+0.008, +0.004, -0.004]` | 1.12 | 6600 K |
-| `cg_cave` | `[-0.014, -0.008, +0.016]` | `[+0.004, +0.004, +0.006]` | 1.22 | 5200 K |
-| `cg_nether` | `[-0.008, -0.008, -0.006]` | `[+0.002, -0.002, -0.006]` | 1.18 | 7200 K |
-| `cg_end` | `[-0.010, -0.010, +0.008]` | `[+0.004, 0.000, +0.012]` | 1.20 | 4600 K |
+| `cg_overworld` | `[0.97, 0.99, 1.04]` | `[1.02, 1.00, 0.97]` | 1.12 | 6500 K |
+| `cg_cold` | `[0.96, 0.99, 1.05]` | `[1.00, 1.00, 1.01]` | 1.10 | 5200 K |
+| `cg_hot` | `[0.98, 0.99, 1.02]` | `[1.02, 1.00, 0.96]` | 1.14 | 7200 K |
+| `cg_swamp` | `[0.96, 1.00, 0.98]` | `[1.01, 1.00, 0.98]` | 1.12 | 6600 K |
+| `cg_cave` | `[0.93, 0.96, 1.04]` | `[0.99, 0.99, 1.00]` | 1.22 | 5200 K |
+| `cg_nether` | `[0.96, 0.95, 0.95]` | `[0.98, 0.97, 0.96]` | 1.18 | 7200 K |
+| `cg_end` | `[0.95, 0.94, 1.03]` | `[1.00, 0.99, 1.02]` | 1.20 | 4600 K |
+
+> Os `offset` desta tabela foram zerados na v1.2.0: o spec oficial define
+> `offset` em [0.0, 4.0] como fator exponencial, e os valores negativos
+> usados antes não tinham significado. O split-tone vive no `gain` acima —
+> azul acima do vermelho nas sombras, vermelho acima do azul nos realces.
+> Detalhes em `docs/scope-decisions.md` §6.
 
 Sombras frias + realces quentes é a assinatura cinema-digital padrão e resolve
 boa parte do pedido de "tonalidade das sombras e realces".
