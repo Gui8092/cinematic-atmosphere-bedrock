@@ -1,0 +1,25 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "Cinematic Atmosphere",
+    "description": "Cinematic lighting, sky, volumetric fog and color grading. Requires Vibrant Visuals.",
+    "uuid": "d5ff3e6f-9ac6-425d-bf42-78d0eca5128e",
+    "version": [1, 0, 0],
+    "min_engine_version": [1, 26, 0],
+    "pack_scope": "any"
+  },
+  "modules": [
+    {
+      "description": "Cinematic Atmosphere resource pack",
+      "type": "resources",
+      "uuid": "c25adead-86c1-4371-abc4-9ff0bd7fa5b1",
+      "version": [1, 0, 0]
+    }
+  ],
+  "capabilities": ["pbr"],
+  "metadata": {
+    "authors": ["Guilherme H. Schmitz"],
+    "license": "MIT",
+    "url": "https://github.com/Gui8092/cinematic-atmosphere-bedrock"
+  }
+}

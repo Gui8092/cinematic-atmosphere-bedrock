@@ -1,0 +1,32 @@
+{
+  "format_version": "1.26.0",
+  "minecraft:water_settings": {
+    "description": {
+      "identifier": "cba:water_fresh"
+    },
+    "particle_concentrations": {
+      "chlorophyll": 0.35,
+      "cdom": 1.2,
+      "suspended_sediment": 0.8
+    },
+    "biome_water_color_contribution": 0.25,
+    "caustics": {
+      "enabled": true,
+      "frame_length": 0.09,
+      "scale": 0.5,
+      "power": 1
+    },
+    "waves": {
+      "enabled": false,
+      "frequency": 1,
+      "octaves": 28,
+      "depth": 1,
+      "speed": 2,
+      "shape": 1.5,
+      "pull": 0.38,
+      "mix": 0.2,
+      "frequency_scaling": 1.2,
+      "speed_scaling": 1.03
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "format_version": "1.21.120",
+  "minecraft:client_biome": {
+    "description": {
+      "identifier": "minecraft:pale_garden"
+    },
+    "components": {
+      "minecraft:sky_color": {
+        "sky_color": "#b9b9b9"
+      },
+      "minecraft:fog_appearance": {
+        "fog_identifier": "cba:fog_cold"
+      },
+      "minecraft:water_appearance": {
+        "surface_color": "#76889D"
+      },
+      "minecraft:grass_appearance": {
+        "color": "#778272"
+      },
+      "minecraft:foliage_appearance": {
+        "color": "#878d76"
+      },
+      "minecraft:dry_foliage_color": {
+        "color": "#A0A69C"
+      },
+      "minecraft:atmosphere_identifier": {
+        "atmosphere_identifier": "cba:atmos_cold"
+      },
+      "minecraft:color_grading_identifier": {
+        "color_grading_identifier": "cba:cg_cave"
+      },
+      "minecraft:lighting_identifier": {
+        "lighting_identifier": "cba:lighting_cold"
+      },
+      "minecraft:water_identifier": {
+        "water_identifier": "cba:water_swamp"
+      },
+      "minecraft:cubemap_identifier": {
+        "cubemap_identifier": "cba:cubemap_overworld"
+      },
+      "minecraft:ambient_sounds": {
+        "underwater_addition": {
+          "asset": "ambient.underwater.additions",
+          "chance": 0.01
+        },
+        "underwater_loop": "ambient.underwater.loop"
+      },
+      "minecraft:biome_music": {
+        "volume_multiplier": 0
+      }
+    }
+  }
+}
