@@ -1,0 +1,25 @@
+# Normalizacao de fim de linha e atributos de arquivo.
+# O projeto e editado em Windows com PowerShell 5.1, que le .ps1 como ANSI
+# quando nao ha BOM. Por isso os scripts sao versionados com BOM
+# (ver .editorconfig e a verificacao em tools/validate.ps1).
+
+* text=auto eol=lf
+
+# Artefato binario: nunca converter linha de linha.
+*.mcpack binary
+*.mcpack -text -diff
+
+# Imagens
+*.png binary
+*.tga binary
+*.jpg binary
+*.jpeg binary
+*.ogg binary
+*.wav binary
+
+# Documentacao e JSON: LF, sem BOM.
+*.md   text eol=lf
+*.json text eol=lf
+
+# Scripts PowerShell: LF no repositorio.
+*.ps1  text eol=lf

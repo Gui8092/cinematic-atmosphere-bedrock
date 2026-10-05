@@ -1,0 +1,30 @@
+# Padroes de edicao deste repositorio.
+#
+# O ponto critico: PowerShell 5.1 le um .ps1 SEM BOM como ANSI (Windows-1252).
+# Isso corrompe acentos e pode quebrar o parsing de literais. Todo script .ps1
+# deste repositorio DEVE ser gravado em UTF-8 COM BOM. O bloco [*.ps1] abaixo
+# declara isso; tools\validate.ps1 verifica.
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+
+[*.{ps1}]
+charset = utf-8-bom
+indent_size = 4
+
+[*.{json}]
+indent_size = 2
+max_line_length = off
+
+[*.md]
+indent_size = 2
+trim_trailing_whitespace = false
+
+[*.{yml,yaml}]
+indent_size = 2

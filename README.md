@@ -109,7 +109,7 @@ cores de céu/água por bioma; nada mais.
 | Nether | `cba:lighting_nether` · `cba:atmos_nether` · `cba:cg_nether` | 3400 K, névoa densa e curta, **sem fluorescência** |
 | End | `cba:lighting_end` · `cba:atmos_end` · `cba:cg_end` | Violeta profundo, flash sutil, sensação de isolamento |
 
-Detalhes e justificativas: [`docs/art-direction.md`](docs/art-direction.md).
+
 
 ---
 
@@ -130,9 +130,55 @@ Todos os valores são planos e reversíveis. Reinicie o mundo ou use
 | **Ligar ondas na água** | `water\*.json` (todos, igual) | `waves.enabled` → `true` |
 | Voltar ao visual mais parecido com o vanilla | `color_grading\*.json` (todos, igual) | `tone_mapping.operator` → `"generic"` |
 
+### Receita: cor de luz de tochas e lanternas
+
+Não é incluído no pack (mudaria a direção artística aprovada), mas o caminho
+**foi validado** e a receita funciona. Crie
+`resource_pack\local_lighting\local_lighting.json`:
+
+```json
+{
+  "format_version": "1.21.120",
+  "minecraft:local_light_settings": {
+    "minecraft:torch":        { "light_type": "point_light", "light_color": "#FFD9A8" },
+    "minecraft:lantern":      { "light_type": "point_light", "light_color": "#FFB870" },
+    "minecraft:candle":       { "light_type": "point_light", "light_color": "#FFD9A8" },
+    "minecraft:end_rod":      { "light_type": "point_light", "light_color": "#FFFFFF" },
+    "minecraft:soul_torch":   { "light_type": "point_light", "light_color": "#7FD8FF" },
+    "minecraft:soul_lantern": { "light_type": "point_light", "light_color": "#7FD8FF" }
+  }
+}
+```
+
+> ⚠️ `light_type` é **obrigatório** no schema. Os valores acima reproduzem a
+> classificação que o jogo já usa, então só a cor muda. Point lights são
+> custosas — o jogo limita a quantidade por hardware.
+
 > ⚠️ `tone_mapping.operator`, `orbital_offset_degrees`, `caustics` e `waves` **não
 > são interpoláveis** entre biomas. Se mudar, mude em **todos** os arquivos do
 > mesmo tipo, senão `validate.ps1` acusa.
+
+Detalhes e justificativas de cada decisão: [`docs/art-direction.md`](docs/art-direction.md).
+
+### Se preferir zero conteúdo transcrito
+
+Os 89 arquivos de bioma reproduzem componentes vanilla para preservar som,
+música e cores. Se você preferir um pack **sem nenhum valor transcrito** da
+referência da Mojang:
+
+```powershell
+.\tools\generate-biomes.ps1 -Minimal
+.\tools\build.ps1
+```
+
+**Leia o tradeoff antes:** o modo `-Minimal` escreve só os 6 identificadores
+Vibrant Visuals. Se o motor **substituir** o `client_biome` vanilla em vez de
+mesclar por componente — algo que a documentação **não esclarece** — os biomas
+perderiam `ambient_sounds` (88 de 89), `biome_music` (56 de 89),
+`water_appearance` (89 de 89), cores de grama/folhagem e `sky_color`. O modo
+padrão é seguro nas duas hipóteses.
+
+Para voltar ao padrão: `.\tools\generate-biomes.ps1` (sem `-Minimal`).
 
 ---
 
@@ -142,8 +188,9 @@ Todas em PowerShell, **sem dependências externas**. O caminho padrão é
 **100% offline** — a única operação que acessa a rede é o `-SyncBaseline`.
 
 ```powershell
-.\tools\validate.ps1                        # 73 verificações estáticas (offline)
+.\tools\validate.ps1                        # 80 verificações estáticas (offline)
 .\tools\validate.ps1 -CheckOfficial         # + 2: compara com a referência oficial (requer internet)
+.\tools\fog-report.ps1                    # densidade de fog por altura vs vanilla
 .\tools\test-negative.ps1                   # 29 testes negativos do verificador de pacote
 .\tools\verify-package.ps1 -Package <arquivo> # verificação autônoma de um .mcpack
 .\tools\build.ps1                            # valida, empacota e verifica dist\*.mcpack
@@ -190,7 +237,7 @@ completa, com as categorias de conteúdo e as citações do EULA, está em
 
 | Categoria | Estado |
 |---|---|
-| Testes estáticos (sintaxe, manifesto, referências, versões, schemas, procedência) | ✅ **Executados — 73 verificações, 0 falhas** |
+| Testes estáticos (sintaxe, manifesto, referências, versões, schemas, procedência, BOM, artefato) | ✅ **Executados — 80 verificações, 0 falhas, 0 avisos** |
 | Empacotamento e estrutura do `.mcpack` | ✅ **Executado** — 130 entradas, `manifest.json` na raiz, SHA256 registrado |
 | **Testes visuais dentro do Minecraft** | ⏳ **NÃO executados** — exige acesso ao jogo e a hardware |
 | **Medição de desempenho / FPS** | ⏳ **NÃO executada** — nenhum número de FPS é alegado |
@@ -276,7 +323,7 @@ Detalhamento completo e fontes: [`docs/research.md`](docs/research.md) e
 └── dist\                    Cinematic_Atmosphere_Bedrock.mcpack
 ```
 
-**147 arquivos** no total (130 no pack + 17 de projeto).
+**150 arquivos** no total (130 no pack + 20 de projeto).
 
 ---
 

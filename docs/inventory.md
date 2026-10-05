@@ -26,8 +26,8 @@ inventário **real** do projeto.
 | `docs/` (4 documentos) | 4 |
 | `tools/` (6 scripts + 1 baseline) | 7 |
 | `dist/Cinematic_Atmosphere_Bedrock.mcpack` | 1 |
-| **Subtotal do projeto** | **17** |
-| **TOTAL** | **147** |
+| **Subtotal do projeto** | **20** |
+| **TOTAL** | **150** |
 
 Pacote empacotado: **130 entradas** (129 `.json` + 1 `.png`), confirmado por
 `tools\build.ps1` e `tools\verify-package.ps1`.
@@ -217,7 +217,7 @@ decodificar corretamente os acentos.
 | Item | Motivo | Prejudica o objetivo principal? |
 |---|---|---|
 | `shadows/` | A documentação diz `shadows/global.json`; um pack de exemplo diz `shadows/shadows.json`; o vanilla em 1.26.50.4 **não tem a pasta**. Sem caminho comprovado. O padrão do jogo já é `soft_shadows` | **Não** |
-| `local_lighting/` | Documentado, mas **sem precedente no vanilla 1.26.50.4**. Cada entrada exigiria redeclarar `light_type`, com risco de mudar a classificação das point lights do jogo. Mesmo efeito por `emissive.desaturation` | **Não** |
+| `local_lighting/` | **Path validado** (schema oficial + schema independente + template do Anvil + dezenas de packs reais). Omitido por **decisão artística**: incluir exigiria redeclarar `light_type` em cada entrada e mudaria a cor das tochas/lanternas, o que está fora da direção aprovada. Receita pronta no `README.md` §5 | **Não** |
 | `pbr/global.json` | Alteraria materiais de renderização — fora do escopo. O valor vanilla equivalente é um no-op | **Não** |
 | `waves` ligadas | Decisão artística aprovada: preserva a animação de textura original do Minecraft | **Não** — receita no `README.md` §5 |
 | Texturas / modelos / sons / UI | Fora do escopo por definição | **Não** |
