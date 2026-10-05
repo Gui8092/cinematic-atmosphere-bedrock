@@ -4,6 +4,175 @@ Todas as mudanças relevantes deste resource pack.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 Versionamento do pack segue SemVer no `manifest.json`.
 
+## [1.2.0] — 2026-10-05
+
+Auditoria contra a **documentação oficial do Mojang** e o sistema de água. Nenhuma
+textura, modelo, som, material ou bioma alterado. Nenhuma decisão de direção de
+arte tomada — este release é sobre **spec e medição**.
+
+## 17 faixas oficiais que não eram conferidas
+
+Os schemas em `Mojang/bedrock-samples@v1.26.50.4/documentation/` declaram faixas
+numéricas explícitas. Nenhuma era validada:
+
+| Parâmetro | Faixa oficial | Antes |
+|---|---|---|
+| `highlightsMin` | 1.0 – 4.0 | não conferido |
+| `shadowsMax` | 0.1 – 1.0 | não conferido |
+| `sky.intensity` | 0.1 – 1.0 | não conferido |
+| `emissive.desaturation` | 0.0 – 1.0 | não conferido |
+| `ambient.illuminance` | 0.0 – 5.0 | parcial |
+| `caustics.frame_length` | 0.01 – 5.0 | não conferido |
+| `caustics.scale` | 0.1 – 5.0 | não conferido |
+| `waves.depth` | 0.0 – 3.0 | não conferido |
+| `waves.frequency` | 0.01 – 3.0 | não conferido |
+| `waves.frequency_scaling` | 0.0 – 2.0 | não conferido |
+| `waves.mix` | 0.0 – 1.0 | não conferido |
+| `waves.octaves` | 1 – 30 | não conferido |
+| `waves.pull` | −1.0 – 1.0 | não conferido |
+| `waves.shape` | 1.0 – 10.0 | não conferido |
+| `waves.speed` | 0.01 – 10.0 | não conferido |
+| `waves.speed_scaling` | 0.0 – 2.0 | não conferido |
+| `waves.direction_increment` | 0.0 – 360.0 | não conferido |
+
+Mais dois enums: `temperature.type` (`color_temperature` \| `white_balance`) e
+`tone_mapping.operator` (6 valores). Agora **158 valores** em 16 parâmetros são
+conferidos.
+
+`waves.direction_increment` é o único que o pack não usa — e o check reporta
+isso explicitamente como omissão opcional, não como falha silenciosa.
+
+### Corrigido: `offset` estava sendo validado contra uma faixa errada
+
+O script usava `[-1, 1]`; a documentação diz **`[0.0, 4.0]`** e descreve offset
+como "an exponential factor". Somos mais estritos, e isso fica registrado em vez
+de silencioso.
+
+## 21 offsets fora do spec foram removidos
+
+Os 7 arquivos de color grading usavam `offset` **negativo** (−0,014 a +0,016)
+para alcanzar o lado frio das sombras. Pela documentação, offset vai de 0.0 a 4.0
+e é um fator exponencial — negativo não tem significado. O vanilla nunca usa
+offset (`midtones.offset: [0,0,0,0,0,0]`).
+
+**Nada se perde.** O split-tone continua inteiro pelo `gain`, que está em faixa
+válida e é o mecanismo que efetivamente carrega o efeito — vermelho > azul nas
+highlights, azul > vermelho nas shadows, em todos os 7 perfis. Os offsets eram
+0,002 a 0,016 numa escala de 0 a 4, ou seja 0,05% a 0,4%.
+
+## Corrigido: o oceano fundo era mais turvo que a superfície
+
+`water/deep_ocean.json` tinha `suspended_sediment: 0.15`, **maior** que
+`ocean`'s 0.10 — o fundo seria mais lama que a beira-mar. Corrigido para 0.08.
+Diferença pequena o suficiente para ser invisível, mas a direção estava errada.
+
+Foi encontrado pelo check novo, não por leitura.
+
+## Descoberta: o vanilla **não** diferencia raso de fundo
+
+Cinco pares de biomas usam **exatamente a mesma** `water_appearance.surface_color`:
+
+| Raso | Fundo | Cor |
+|---|---|---|
+| `ocean` | `deep_ocean` | `#1787D4` |
+| `cold_ocean` | `deep_cold_ocean` | `#2080C9` |
+| `warm_ocean` | `deep_warm_ocean` | `#02B0E5` |
+| `lukewarm_ocean` | `deep_lukewarm_ocean` | `#0D96DB` |
+| `frozen_ocean` | `deep_frozen_ocean` | `#2570B5` |
+
+A profundidade é carregada inteiramente pelas configurações de água, via
+`biome_water_color_contribution` e as concentrações de partícula. Por isso o
+validador agora **exige** que o perfil `deep` tenha contribuição e sedimento
+menores que `ocean` e `warm` — sem isso, raso e fundo seriam indistinguíveis.
+
+## Sobre a calibração de `water_appearance.surface_color`
+
+**Não foi alterada.** E a conclusão honesta é que não precisava.
+
+A `surface_color` é um *tint* iluminado pelo sol: quanto mais saturada a luz,
+mais o tint se revela. A correção de sol da v1.1.0 levou o spread do pôr do sol de
+**151 para 208** (vanilla: 255) — ou seja, **a calibração da água foi resolvida
+indiretamente**, pelo fix do sol. Alterar 89 cores sem poder ver o resultado
+seria trocar medição por chute.
+
+Em vez disso, **`tools/water-report.ps1`** torna o sistema auditável offline:
+
+- a física dos 6 perfis (cdom, clorofila, sedimento, contribuição)
+- a tabela perfil × cor de superfície com luminância, spread e calor
+- três sinais de revisão: tints muito saturados, pares raso/fundo, perfil
+  congelado com tint quente
+- a relação com o spread do sol, que é o acoplamento não observável offline
+
+O relatório também mostra uma inversão de sedimento que **não é erro**: `fresh`
+cobre rios e lagos, que são siltosos (sedimento 0.8 com contribuição 0.25, contra
+0.1 e 0.30 do oceano aberto). Menos tint, mais lama. A inversão é o design.
+
+## Testes negativos
+
+12 parâmetros fora de faixa foram injetados, **alterando todos os arquivos de cada
+tipo** para que o check de uniformidade passasse e só o de faixa pudesse pegar:
+
+| Injetado | Detectado |
+|---|---|
+| `sky.intensity = 0.05` | `cave.json: sky.intensity = 0,05 fora da faixa oficial [0,1, 1]` |
+| `emissive.desaturation = 1.5` | `fora da faixa oficial [0, 1]` |
+| `ambient.illuminance = 9.5` (keyframe) | `ambient.illuminance[0.000000] fora de [0.0, 5.0]` |
+| `highlightsMin = 0.5` | `fora da faixa oficial [1, 4]` |
+| `shadowsMax = 0.05` | `fora da faixa oficial [0,1, 1]` |
+| `waves.octaves = 45` | `fora da faixa oficial [1, 30]` |
+| `waves.shape = 20.0` | `fora da faixa oficial [1, 10]` |
+| `waves.mix = 1.4` | `fora da faixa oficial [0, 1]` |
+| `waves.pull = 1.5` | `fora da faixa oficial [-1, 1]` |
+| `caustics.scale = 9.0` | `fora da faixa oficial [0,1, 5]` |
+| `tone_mapping.operator = "filmic"` | `nao e um valor oficial` |
+| `temperature.type = "kelvin"` | `nao e um valor oficial` |
+
+Mais: `deep` indistinguível de `ocean`, `deep` mais turvo que `ocean`, e
+`surface_color = #GGGGGG`. Todos reprovados.
+
+### Quatro erros meus nesta auditoria, todos corrigidos
+
+1. **Check que não conferia nada.** A primeira versão derivava a raiz do caminho e
+   usava `color_grading` como chave de topo — que não existe (a real é
+   `minecraft:color_grading_settings`). A travessia retornava nulo e o check
+   reportava `ok` sem avaliar um único valor. Hoje existe um contador de valores
+   e um guard que reprova se uma faixa declarada nunca for avaliada.
+2. **Caminho com um nível a menos.** `color_grading.highlightsMin` em vez de
+   `color_grading.highlights.highlightsMin`. Pego pelo mesmo guard.
+3. **Quebra em keyframe.** `ambient.illuminance` é um objeto de keyframes, não um
+   escalar; o check quebrava com *"Não é possível converter ... PSCustomObject em
+   Double"*. Agora ele achata escalar, vetor e keyframes.
+4. **Arquivo espúrio criado por mim.** Um teste negativo de `water/deep.json`
+   (nome inexistente — o real é `deep_ocean.json`) recriou o arquivo vazio no pacote, porque o `finally` escrevia de volta mesmo com a leitura tendo
+   falhado. Removido; `git status` em `resource_pack/water/` ficou limpo.
+
+## `docs/scope-decisions.md` — novo
+
+Registro de decisão com o que cada alternativa custa:
+
+- **grama e folhagem** — 31 biomas intocados, fora do escopo declarado. As três
+  opções (manter / ampliar / seletiva) com ganho e custo de cada uma.
+  **Em aberto, aguardando sua decisão.**
+- **`local_lighting/`** — corrigida uma afirmação anterior minha: o termo
+  **não aparece** em nenhum dos 6 documentos oficiais. Sem documentação do
+  Mojang, fica de fora.
+- **`biomes_client.json`**, **`shadows/`** — fora, com o motivo.
+- **split-tone por offset** — a decisão e por que nada se perde.
+- **a noite** — as quatro reduções empilhadas, risco de jogabilidade, não
+  ajustado.
+
+## Validação
+
+| Execução | Verificações | Falhas | Avisos |
+|---|---:|---:|---:|
+| `validate.ps1` (offline) | 104 | 0 | 0 |
+| `validate.ps1 -CheckOfficial` | 109 | 0 | 0 |
+| `test-negative.ps1` | 29 | 0 | 0 |
+
+Testes visuais e de desempenho continuam **não executados**.
+
+---
+
 ## [1.1.0] — 2026-10-05
 
 Correção de direção de arte. **84 valores** em 11 arquivos, todos concentrados

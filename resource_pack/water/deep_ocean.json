@@ -7,7 +7,7 @@
     "particle_concentrations": {
       "chlorophyll": 0.4,
       "cdom": 0.05,
-      "suspended_sediment": 0.15
+      "suspended_sediment": 0.08
     },
     "biome_water_color_contribution": 0.2,
     "caustics": {

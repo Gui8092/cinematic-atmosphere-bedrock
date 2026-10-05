@@ -159,6 +159,8 @@ Não é incluído no pack (mudaria a direção artística aprovada), mas o camin
 > mesmo tipo, senão `validate.ps1` acusa.
 
 Detalhes e justificativas de cada decisão: [`docs/art-direction.md`](docs/art-direction.md).
+O que **não** foi decidido, com o custo de cada alternativa — incluindo a cor de
+grama e folhagem, que está em aberto: [`docs/scope-decisions.md`](docs/scope-decisions.md).
 
 ### Se preferir zero conteúdo transcrito
 
@@ -188,7 +190,7 @@ Todas em PowerShell, **sem dependências externas**. O caminho padrão é
 **100% offline** — a única operação que acessa a rede é o `-SyncBaseline`.
 
 ```powershell
-.\tools\validate.ps1                        # 98 verificações estáticas (offline)
+.\tools\validate.ps1                        # 104 verificações estáticas (offline)
 .\tools\validate.ps1 -CheckOfficial         # + 2: compara com a referência oficial (requer internet)
 .\tools\validate.ps1 -SkipArtifact         # usado por build.ps1 antes de empacotar
 .\tools\fog-report.ps1                    # densidade de fog por altura vs vanilla
@@ -207,7 +209,9 @@ Todas em PowerShell, **sem dependências externas**. O caminho padrão é
 | `validate.ps1` | Blocos `[A]`–`[F]`: sintaxe, manifesto, referências, versões, schemas, procedência |
 | `verify-package.ps1` | Verificação de segurança do `.mcpack` — **autônoma**, não divide lógica com o `validate.ps1` |
 | `test-negative.ps1` | Prova que `verify-package.ps1` **reprova** o que deve reprovar |
-| `build.ps1` | Orquestra: valida → empacota → verifica |
+| `fog-report.ps1` | Densidade do fog por altura **e alcance em blocos** vs vanilla — auditável sem o jogo |
+| `water-report.ps1` | Física dos 6 perfis de água + tabela perfil × `surface_color` (luminância, spread, calor) + o acoplamento com o spread do sol |
+| `build.ps1` | Orquestra em 4 etapas: valida → empacota → verifica o pacote → revalida incluindo o artefato |
 
 Detalhe do inventário: [`docs/inventory.md`](docs/inventory.md).
 
@@ -238,9 +242,9 @@ completa, com as categorias de conteúdo e as citações do EULA, está em
 
 | Categoria | Estado |
 |---|---|
-| Testes estáticos (sintaxe, manifesto, referências, versões, schemas, procedência, BOM, alcance do fog, artefato) | ✅ **Executados — 98 verificações, 0 falhas, 0 avisos** |
+| Testes estáticos (sintaxe, manifesto, referências, versões, schemas, procedência, BOM, alcance do fog, água, artefato) | ✅ **Executados — 104 verificações, 0 falhas, 0 avisos** |
 | Testes negativos do verificador de pacote | ✅ **Executados — 29 casos, 0 falhas** |
-| Comparação com a referência oficial (com rede) | ✅ **Executado — 103 verificações, inventário idêntico aos 89 biomas** |
+| Comparação com a referência oficial (com rede) | ✅ **Executado — 109 verificações, inventário idêntico aos 89 biomas** |
 | Empacotamento e estrutura do `.mcpack` | ✅ **Executado** — 130 entradas, `manifest.json` na raiz, SHA256 registrado |
 | **Testes visuais dentro do Minecraft** | ⏳ **NÃO executados** — exige acesso ao jogo e a hardware |
 | **Medição de desempenho / FPS** | ⏳ **NÃO executada** — nenhum número de FPS é alegado |

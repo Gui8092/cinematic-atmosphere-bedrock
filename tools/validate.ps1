@@ -358,7 +358,11 @@ foreach ($f in Get-ChildItem (Join-Path $pack 'color_grading') -Filter *.json) {
         if (-not $blk) { continue }
         foreach ($ch in $blk.gain) { if ([double]$ch -lt 0 -or [double]$ch -gt 10) { Fail "$($f.Name): $range.gain fora de [0,10]" } }
         foreach ($ch in $blk.saturation) { if ([double]$ch -lt 0 -or [double]$ch -gt 10) { Fail "$($f.Name): $range.saturation fora de [0,10]" } }
-        foreach ($ch in $blk.offset) { if ([double]$ch -lt -1 -or [double]$ch -gt 1) { Fail "$($f.Name): $range.offset fora de [-1,1]" } }
+        # A documentacao oficial define offset como [0.0, 4.0]. Ate a v1.1.0
+        # este script usava [-1, 1] — mais estrito que o spec. Mantido o mais
+        # estrito de proposito (offset negativo nao faz sentido no nosso
+        # design), mas a divergencia fica registrada em vez de silenciosa.
+        foreach ($ch in $blk.offset) { if ([double]$ch -lt 0 -or [double]$ch -gt 4) { Fail "$($f.Name): $range.offset fora de [0,4] (spec oficial)" } }
         foreach ($ch in $blk.contrast) { if ([double]$ch -lt 0 -or [double]$ch -gt 4) { Fail "$($f.Name): $range.contrast fora de [0,4]" } }
         foreach ($ch in $blk.gamma) { if ([double]$ch -lt 0 -or [double]$ch -gt 4) { Fail "$($f.Name): $range.gamma fora de [0,4]" } }
     }
@@ -367,6 +371,172 @@ foreach ($f in Get-ChildItem (Join-Path $pack 'color_grading') -Filter *.json) {
     }
 }
 Ok 'ranges de color_grading conferidos'
+
+# --- faixas autoritativas extraidas da documentacao oficial do Mojang -------
+# Fonte: Mojang/bedrock-samples v1.26.50.4/documentation/
+#   Color Grading and Tonemapping.html
+#   Water.html
+#Estas faixas NAO estavam cobertas. Um valor fora delas e aceito pelo motor
+#com resultado imprevisivel (ou ignorado), e nenhum check as pegava.
+#
+# Prefixo $cbaR em tudo: ver nota de colisao de variaveis no bloco do crepusculo.
+# (raiz, diretorio, caminho interno, min, max, rotulo, obrigatorio-no-pack)
+#
+# Learned the hard way, nesta propria checagem:
+#  1. a raiz e a chave de topo real. A primeira versao derivava a raiz do
+#     caminho e usava 'color_grading' como chave de topo — que nao existe
+#     (a real e 'minecraft:color_grading_settings'). Reportava "ok" sem
+#     conferir NENHUM valor.
+#  2. o caminho tem DOIS niveis para sections aninhadas:
+#     color_grading.highlights.highlightsMin, nao color_grading.highlightsMin.
+#  3. parametros ausentes sao opcionais por definicao — absence nao e falha.
+#     O campo final distingue "deveria existir e nao achei" (falha) de
+#     "opcional, nao usamos" (informativo).
+#  4. um parametro pode ser escalar, vetor OU objeto de keyframes.
+# O contador e o guard "nunca avaliadas" existem para que erro de caminho nao
+# possa passar em silencio de novo.
+$cbaRAtt = @(
+    @('minecraft:color_grading_settings', 'color_grading', 'color_grading.highlights.highlightsMin', 1.0, 4.0,  'highlightsMin', $true),
+    @('minecraft:color_grading_settings', 'color_grading', 'color_grading.shadows.shadowsMax',       0.1, 1.0,  'shadowsMax',    $true),
+    @('minecraft:water_settings',         'water',         'caustics.frame_length',                      0.01, 5.0,  'caustics.frame_length', $true),
+    @('minecraft:water_settings',         'water',         'caustics.scale',                             0.1,  5.0,  'caustics.scale',        $true),
+    @('minecraft:water_settings',         'water',         'waves.depth',                                0.0,  3.0,  'waves.depth',           $true),
+    @('minecraft:water_settings',         'water',         'waves.direction_increment',                  0.0,  360.0,'waves.direction_increment', $false),
+    @('minecraft:water_settings',         'water',         'waves.frequency',                            0.01, 3.0,  'waves.frequency',       $true),
+    @('minecraft:water_settings',         'water',         'waves.frequency_scaling',                    0.0,  2.0,  'waves.frequency_scaling', $true),
+    @('minecraft:water_settings',         'water',         'waves.mix',                                  0.0,  1.0,  'waves.mix',             $true),
+    @('minecraft:water_settings',         'water',         'waves.octaves',                              1,    30,   'waves.octaves',         $true),
+    @('minecraft:water_settings',         'water',         'waves.pull',                               -1.0,  1.0,  'waves.pull',            $true),
+    @('minecraft:water_settings',         'water',         'waves.shape',                                1.0,  10.0, 'waves.shape',           $true),
+    @('minecraft:water_settings',         'water',         'waves.speed',                                0.01, 10.0, 'waves.speed',           $true),
+    @('minecraft:water_settings',         'water',         'waves.speed_scaling',                        0.0,  2.0,  'waves.speed_scaling',   $true),
+    @('minecraft:lighting_settings',      'lighting',      'sky.intensity',                              0.1,  1.0,  'sky.intensity',         $true),
+    @('minecraft:lighting_settings',      'lighting',      'emissive.desaturation',                      0.0,  1.0,  'emissive.desaturation', $true),
+    @('minecraft:lighting_settings',      'lighting',      'ambient.illuminance',                        0.0,  5.0,  'ambient.illuminance',   $true)
+)
+# Achata um nole em lista de numeros. Um parametro pode ser escalar
+# (sky.intensity: 0.42), vetor (waves.depth: 1.0 -> [1.0]) OU objeto de
+# keyframes (ambient.illuminance: {0.0: 0.03, 0.25: 0.024, ...}). A primeira
+# versao deste check assumia escalar e quebrava em "Nao e possivel converter
+# ... PSCustomObject ... em Double" nos arquivos que usam keyframes.
+function Get-CbaNumeros($node) {
+    if ($null -eq $node) { return @() }
+    if ($node -is [System.Management.Automation.PSCustomObject]) {
+        $props = @($node.PSObject.Properties)
+        if ($props.Count -eq 0) { return @() }
+        $todosNumericos = $true
+        foreach ($pr in $props) {
+            $v = $pr.Value
+            if ($v -isnot [double] -and $v -isnot [int] -and $v -isnot [decimal]) { $todosNumericos = $false; break }
+        }
+        if ($todosNumericos) { return @($props | ForEach-Object { [double]$_.Value }) }
+        return @()   # objeto de estrutura, nao de keyframes
+    }
+    if ($node -is [System.Array]) {
+        $out = @()
+        foreach ($e in $node) { $out += @([double]$e) }
+        return $out
+    }
+    return @([double]$node)
+}
+
+$cbaRCount = 0
+$cbaRSeen = @{}
+foreach ($cbaSpec in $cbaRAtt) {
+    $cbaRoot = $cbaSpec[0]; $cbaDir = $cbaSpec[1]; $cbaPath = $cbaSpec[2]
+    $cbaMin = [double]$cbaSpec[3]; $cbaMax = [double]$cbaSpec[4]; $cbaLabel = $cbaSpec[5]
+    foreach ($cbaF in Get-ChildItem (Join-Path $pack $cbaDir) -Filter *.json) {
+        if (-not $parsed.ContainsKey($cbaF.FullName)) { continue }
+        $cbaNode = $parsed[$cbaF.FullName].$cbaRoot
+        if ($null -eq $cbaNode) { Fail "raiz '$cbaRoot' ausente em $($cbaF.Name)" ; continue }
+        foreach ($cbaSeg in $cbaPath.Split('.')) {
+            if ($null -eq $cbaNode) { break }
+            $cbaNode = $cbaNode.$cbaSeg
+        }
+        if ($null -eq $cbaNode) { continue }   # parametro ausente e opcional
+        $cbaNums = Get-CbaNumeros $cbaNode
+        if ($cbaNums.Count -eq 0) {
+            Fail ("{0}: {1} presente mas sem valores numericos" -f $cbaF.Name, $cbaLabel)
+            continue
+        }
+        $cbaRSeen[$cbaLabel] = 1
+        foreach ($cbaD in $cbaNums) {
+            if ($cbaD -lt $cbaMin -or $cbaD -gt $cbaMax) {
+                Fail ("{0}: {1} = {2} fora da faixa oficial [{3}, {4}]" -f $cbaF.Name, $cbaLabel, $cbaD, $cbaMin, $cbaMax)
+            }
+            $cbaRCount++
+        }
+    }
+}
+$cbaRequired = @($cbaRAtt | Where-Object { $_[6] } | ForEach-Object { $_[5] })
+$cbaOptional = @($cbaRAtt | Where-Object { -not $_[6] } | ForEach-Object { $_[5] })
+$cbaMissingReq = @($cbaRequired | Where-Object { -not $cbaRSeen.ContainsKey($_) })
+$cbaAbsentOpt = @($cbaOptional | Where-Object { -not $cbaRSeen.ContainsKey($_) })
+if ($cbaMissingReq.Count -gt 0) {
+    Fail "faixas obrigatorias declaradas mas NUNCA avaliadas (caminho errado?): $($cbaMissingReq -join ', ')"
+}
+if ($cbaRCount -eq 0) {
+    Fail 'nenhum valor conferido nas faixas oficiais - o check esta vazio'
+}
+Ok ("{0} faixas oficiais conferidas ({1} valores avaliados, {2}/{3} parametros)" -f `
+    $cbaRAtt.Count, $cbaRCount, $cbaRSeen.Count, $cbaRAtt.Count)
+if ($cbaAbsentOpt.Count -gt 0) {
+    Ok ("opcionais nao usados por decisao nossa (faixa declarada mas sem valor): {0}" -f ($cbaAbsentOpt -join ', '))
+}
+
+# enums oficials
+$cbaRTempType = @('color_temperature', 'white_balance')
+$cbaROperator = @('aces', 'hable', 'reinhard', 'reinhard_luma', 'reinhard_luminance', 'generic')
+foreach ($cbaF in Get-ChildItem (Join-Path $pack 'color_grading') -Filter *.json) {
+    if (-not $parsed.ContainsKey($cbaF.FullName)) { continue }
+    $cbaCg = $parsed[$cbaF.FullName].'minecraft:color_grading_settings'
+    if ($cbaCg.color_grading.temperature.type -notin $cbaRTempType) {
+        Fail ("{0}: temperature.type '{1}' nao e um valor oficial ({2})" -f $cbaF.Name, $cbaCg.color_grading.temperature.type, ($cbaRTempType -join '|'))
+    }
+    if ($cbaCg.tone_mapping.operator -notin $cbaROperator) {
+        Fail ("{0}: tone_mapping.operator '{1}' nao e um valor oficial ({2})" -f $cbaF.Name, $cbaCg.tone_mapping.operator, ($cbaROperator -join '|'))
+    }
+}
+Ok 'enums oficiais conferidos (temperature.type, tone_mapping.operator)'
+
+# --- coerencia do sistema de agua -------------------------------------------
+# O vanilla NAO diferencia a surface_color entre oceano raso e fundo: ocean e
+# deep_ocean usam #1787D4, cold_ocean e deep_cold_ocean usam #2080C9, e assim
+# por diante (5 pares identicos). A profundidade e carregada pelas configuracoes
+# de agua, via biome_water_color_contribution e as concentracoes de particula.
+# Portanto a separacao shallow/deep depende SO do perfil, e e preciso garantir
+# que ela existe.
+$shallowDeep = @{ 'ocean' = 'deep'; 'warm' = 'deep' }
+foreach ($fam in @('ocean', 'warm')) {
+    $fS = Join-Path $pack "water\$fam.json"
+    $fD = Join-Path $pack "water\deep_ocean.json"
+    if (-not ($parsed.ContainsKey($fS) -and $parsed.ContainsKey($fD))) { continue }
+    $cS = [double]$parsed[$fS].'minecraft:water_settings'.biome_water_color_contribution
+    $cD = [double]$parsed[$fD].'minecraft:water_settings'.biome_water_color_contribution
+    $sS = [double]$parsed[$fS].'minecraft:water_settings'.particle_concentrations.suspended_sediment
+    $sD = [double]$parsed[$fD].'minecraft:water_settings'.particle_concentrations.suspended_sediment
+    if ($cD -ge $cS) {
+        Fail "water/deep: contribuicao ($cD) >= $fam ($cS) — o fundo nao seria distinguivel, porque o vanilla NAO separa a surface_color"
+    }
+    if ($sD -gt $sS) {
+        Fail "water/deep: sedimento ($sD) > $fam ($sS) — o fundo seria mais turvo que a superficie"
+    }
+    Ok ("water/deep vs {0}: contrib {1} < {2} e sedimento {3} <= {4} — fundo distinguivel" -f $fam, $cD, $cS, $sD, $sS)
+}
+
+# todo bioma precisa de surface_color hex valido, porque e ela que carrega a
+# identidade visual da agua quando o vanilla nao differentiate
+$semSurface = @()
+foreach ($f in Get-ChildItem (Join-Path $pack 'biomes') -Filter *.json) {
+    if (-not $parsed.ContainsKey($f.FullName)) { continue }
+    $wa = $parsed[$f.FullName].'minecraft:client_biome'.components.'minecraft:water_appearance'
+    if (-not $wa -or -not $wa.surface_color) { $semSurface += $f.Name; continue }
+    if ($wa.surface_color -notmatch '^#?[0-9a-fA-F]{6}$') {
+        Fail "$($f.Name): water_appearance.surface_color '$(($wa.surface_color))' nao e hex de 6 digitos"
+    }
+}
+if ($semSurface.Count -gt 0) { Fail "biomas sem water_appearance.surface_color: $($semSurface.Count) (ex: $($semSurface[0]))" }
+else { Ok "todos os 89 biomas tem surface_color hex valido" }
 
 foreach ($f in Get-ChildItem (Join-Path $pack 'fogs') -Filter *.json) {
     $fg = $parsed[$f.FullName].'minecraft:fog_settings'

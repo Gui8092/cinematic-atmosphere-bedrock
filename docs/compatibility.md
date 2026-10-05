@@ -72,8 +72,8 @@ ativar o pack numa versão em que parte dos arquivos seria inerte.
 
 | Execução | Verificações | Falhas | Avisos |
 |---|---:|---:|---:|
-| `validate.ps1` (padrão, sem rede) | 98 | 0 | 0 |
-| `validate.ps1 -CheckOfficial` (com rede) | 103 | 0 | 0 |
+| `validate.ps1` (padrão, sem rede) | 104 | 0 | 0 |
+| `validate.ps1 -CheckOfficial` (com rede) | 109 | 0 | 0 |
 | `test-negative.ps1` | 29 | 0 | 0 |
 
 | Bloco | Cobre |
