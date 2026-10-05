@@ -6,6 +6,7 @@ elemento de jogabilidade — apenas reconfigura como o mundo é iluminado e
 atmosphericamente colorido.
 
 - **Alvo:** Minecraft Bedrock **1.26.50.x** (release estável `v1.26.50.4` da Mojang)
+- **Mínimo:** **1.26.50** (`min_engine_version`)
 - **Mecanismo:** **Vibrant Visuals** (capability `"pbr"`)
 - **Itens no pack:** 130 arquivos — 129 `.json` + `pack_icon.png`
 - **Namespace:** `cba`
@@ -24,11 +25,17 @@ atmosphericamente colorido.
 
 | Item | Valor |
 |---|---|
-| Versão mínima do jogo | **1.26.0** (`min_engine_version`) |
+| Versão mínima do jogo | **1.26.50** (`min_engine_version`) |
 | Versão de desenvolvimento | 1.26.50.x |
 | SO principal | Windows 10 / 11 |
 | Modo gráfico | **Vibrant Visuals** ativado |
 | GPU | Suporte a DirectX 12 |
+
+> **Por que 1.26.50 e não 1.26.0?** O arquivo de bioma de `dappled_forest` usa
+> `format_version` `1.26.50` na referência oficial, e este pack **preserva o
+> formato original de cada bioma** em vez de rebaixá-lo. Rebaixar poderia mudar a
+> interpretação do schema ou fazer o motor rejeitar propriedades. Logo, o mínimo
+> coerente é a maior versão de formato efetivamente usada.
 
 > **Importante:** a partir da versão **1.26.0** o Minecraft passou a numerar
 > releases por ano (`26.x`). Nos arquivos JSON e no `min_engine_version` o
@@ -131,27 +138,59 @@ Todos os valores são planos e reversíveis. Reinicie o mundo ou use
 
 ## 6. Ferramentas
 
+Todas em PowerShell, **sem dependências externas**. O caminho padrão é
+**100% offline** — a única operação que acessa a rede é o `-SyncBaseline`.
+
 ```powershell
-.\tools\validate.ps1                      # 75 verificações estáticas
-.\tools\build.ps1                          # valida e gera dist\*.mcpack
-.\tools\generate-biomes.ps1                # reaplica o mapa bioma -> config
-.\tools\generate-biomes.ps1 -RefreshVanilla # reimporta o baseline vanilla (requer internet)
+.\tools\validate.ps1                        # 73 verificações estáticas (offline)
+.\tools\validate.ps1 -CheckOfficial         # + 2: compara com a referência oficial (requer internet)
+.\tools\test-negative.ps1                   # 29 testes negativos do verificador de pacote
+.\tools\verify-package.ps1 -Package <arquivo> # verificação autônoma de um .mcpack
+.\tools\build.ps1                            # valida, empacota e verifica dist\*.mcpack
+.\tools\generate-biomes.ps1                  # regenera os 89 biomas (usa o baseline local)
+.\tools\generate-biomes.ps1 -SyncBaseline    # reimporta a referência fixada (requer internet)
 ```
 
-`validate.ps1` cobre: sintaxe de todos os JSONs, manifesto e UUIDs,
-integridade referencial de todos os identificadores, cobertura dos 89 biomas,
-parâmetros não-interpoláveis, ranges de cada schema, ciclos de keyframe e
-**não-invasão** (nenhuma textura/modelo/som/material no pack).
+| Script | Função |
+|---|---|
+| `biome-map.ps1` | Fonte única de verdade: identificadores, 16 famílias, versão por tipo, regra de cubemap |
+| `vanilla-baseline.json` | Baseline transcrito da referência oficial (procedência declarada) |
+| `generate-biomes.ps1` | Gera os 89 arquivos a partir do mapa + baseline |
+| `validate.ps1` | Blocos `[A]`–`[F]`: sintaxe, manifesto, referências, versões, schemas, procedência |
+| `verify-package.ps1` | Verificação de segurança do `.mcpack` — **autônoma**, não divide lógica com o `validate.ps1` |
+| `test-negative.ps1` | Prova que `verify-package.ps1` **reprova** o que deve reprovar |
+| `build.ps1` | Orquestra: valida → empacota → verifica |
 
 Detalhe do inventário: [`docs/inventory.md`](docs/inventory.md).
 
 ---
 
-## 7. Estado dos testes
+## 7. Procedência e licença
+
+O `LICENSE` aplica a **MIT** ao código, às ferramentas, à documentação e às
+configurações escritas originalmente para este pack (tudo em `lighting/`,
+`atmospherics/`, `color_grading/`, `water/`, `fogs/`, `cubemaps/`).
+
+Os **89 arquivos de `biomes/`** incorporam um punhado de **valores factuais**
+transcritos do pack oficial da Mojang: identificadores de bioma, de evento de
+som e de faixa de música, e cores hexadecimais. Nenhum arquivo foi copiado e
+**nenhum asset oficial** (textura, modelo, som, geometria, partícula) está no
+repositório.
+
+A licença declarada pela Mojang para o material de referência é
+*"(c) Mojang AB. All rights reserved — sujeito ao Minecraft EULA"*. A análise
+completa, com as categorias de conteúdo e as citações do EULA, está em
+[`NOTICE`](NOTICE) e em [`docs/research.md`](docs/research.md) §11.
+
+> Isto é uma leitura técnica das licenças, **não um parecer jurídico**.
+
+---
+
+## 8. Estado dos testes
 
 | Categoria | Estado |
 |---|---|
-| Testes estáticos (sintaxe, manifesto, referências, ranges, cobertura, não-invasão) | ✅ **Executados — 75 verificações, 0 falhas** |
+| Testes estáticos (sintaxe, manifesto, referências, versões, schemas, procedência) | ✅ **Executados — 73 verificações, 0 falhas** |
 | Empacotamento e estrutura do `.mcpack` | ✅ **Executado** — 130 entradas, `manifest.json` na raiz, SHA256 registrado |
 | **Testes visuais dentro do Minecraft** | ⏳ **NÃO executados** — exige acesso ao jogo e a hardware |
 | **Medição de desempenho / FPS** | ⏳ **NÃO executada** — nenhum número de FPS é alegado |
@@ -165,7 +204,7 @@ Detalhe do inventário: [`docs/inventory.md`](docs/inventory.md).
 
 ---
 
-## 8. Solução de problemas
+## 9. Solução de problemas
 
 | Sintoma | Causa provável | O que fazer |
 |---|---|---|
@@ -184,7 +223,7 @@ JSON em questão.
 
 ---
 
-## 9. Escopo e limitações declaradas
+## 10. Escopo e limitações declaradas
 
 Este pack **não** faz, e não promete fazer:
 
@@ -208,16 +247,17 @@ Detalhamento completo e fontes: [`docs/research.md`](docs/research.md) e
 
 ---
 
-## 10. Estrutura
+## 11. Estrutura
 
 ```
 .
 ├── README.md
 ├── CHANGELOG.md
-├── LICENSE                    MIT
+├── LICENSE                    MIT (com escopo delimitado)
+├── NOTICE                     procedência e licenciamento dos valores transcritos
 ├── .gitignore
 ├── docs\
-│   ├── research.md          pesquisa, fontes e decisões técnicas
+│   ├── research.md          pesquisa, fontes, licenciamento, decisões técnicas
 │   ├── compatibility.md     matriz de compatibilidade, riscos, checklist visual
 │   ├── art-direction.md     direção artística por ambiente e o caso das cavernas
 │   └── inventory.md         inventário definitivo de arquivos
@@ -231,11 +271,12 @@ Detalhamento completo e fontes: [`docs/research.md`](docs/research.md) e
 │   ├── fogs\            10 arquivos
 │   ├── cubemaps\         1 arquivo
 │   └── biomes\          89 arquivos
-├── tools\                   biome-map, generate-biomes, validate, build
+├── tools\                   biome-map, vanilla-baseline, generate-biomes,
+│                             validate, verify-package, test-negative, build
 └── dist\                    Cinematic_Atmosphere_Bedrock.mcpack
 ```
 
-**141 arquivos** no total (130 no pack + 11 de projeto).
+**147 arquivos** no total (130 no pack + 17 de projeto).
 
 ---
 

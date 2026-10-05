@@ -352,7 +352,160 @@ névoa seja **exatamente zero** na maior parte do ar de superfície.
 
 ---
 
-## 10. Fontes
+## 11. Procedência e licenciamento (auditoria de 2026-10-05)
+
+### 11.1 O achado
+
+O `LICENSE.md` do repositório oficial da Mojang diz, literalmente:
+
+> (c) Mojang AB. All rights reserved.
+> By downloading the files in this repository, you agree to the
+> Minecraft End User License Agreement and that these files are subject to
+> its terms.
+
+Ou seja: os 89 arquivos `resource_pack/biomes/*.client_biome.json` que este
+projeto escrevia **não são MIT**. A versão anterior do `LICENSE` declarava MIT
+para o repositório inteiro — o que era **incorreto**.
+
+### 11.2 Categoria do conteúdo
+
+O que este projeto efetivamente traz da referência oficial:
+
+| Tipo | Exemplo | É criação autoral? |
+|---|---|---|
+| Identificador de bioma | `minecraft:plains` | Não — é um nome |
+| Identificador de evento de som | `ambient.underwater.additions` | Não — é um nome |
+| Identificador de faixa de música | `end`, `sulfur_caves` | Não — é um nome |
+| Cor hexadecimal | `#62529e`, `#df6827` | Não — é um número |
+
+**Nenhum arquivo foi copiado.** O baseline (`tools/vanilla-baseline.json`) contém
+só esses valores. Nenhuma textura, modelo, som, geometria, partícula ou
+animação oficial está no repositório.
+
+### 11.3 Base factual no EULA
+
+Trechos do [Minecraft EULA](https://www.minecraft.net/en-us/eula) (obtidos em
+2026-10-05):
+
+- **Mods:** "By 'Mods,' we mean something original that you or someone else
+  created that **doesn't contain a substantial part of our copyrightable code or
+  content**." … "**Mods are okay to distribute**." … "You only own what you
+  created; you do not own our code or content."
+- **Content:** "We will however own things that are copies (or substantial
+  copies) or derivatives of our property and creations."
+- **Resumo:** "**Do not distribute or make commercial use of anything we've made
+  without our permission.**"
+
+Identificadores e literais hexadecimais não são expressão autoral e não
+constituem "parte substancial de conteúdo protejável". Nenhum asset é
+distribuído. **Leitura técnica, não parecer jurídico** — ver `NOTICE` §4.4.
+
+### 11.4 Correções aplicadas
+
+1. `LICENSE` passou a delimitar o escopo do MIT e a excluir explicitamente os
+   valores transcritos.
+2. `NOTICE` criado, com atribuição, fonte, tag, as 5 categorias e a limitação
+   declarada.
+3. `tools/vanilla-baseline.json` versionado: o build padrão deixou de depender
+   de baixar arquivos da Mojang.
+4. `generate-biomes.ps1` reescrito: gera a partir do baseline, com
+   `-SyncBaseline` como única operação que acessa a rede.
+5. `validate.ps1` verifica que cada bioma contém **exatamente** os componentes
+   do baseline, e nenhum componente fora do baseline.
+
+### 11.5 O que NÃO foi feito, e por quê
+
+Não foi declarada a distribuição "proibida". Seria infundado: o EULA proíbe
+distribuir **assets**, e não há nenhum aqui. A afirmação correta é a
+intermediária — nenhum asset é distribuído, alguns valores factuais são
+transcritos e atribuídos.
+
+---
+
+## 12. `format_version` dos arquivos de bioma (achado da auditoria)
+
+O gerador aplicava `1.21.120` a todos os 89 arquivos. A referência oficial usa
+**três** formatos:
+
+| `format_version` | Quantidade | Biomas |
+|---|---:|---|
+| `1.21.120` | 87 | todos, exceto os dois abaixo |
+| `1.26.0` | 1 | `sulfur_caves` |
+| `1.26.50` | 1 | `dappled_forest` |
+
+**Risco do rebaixamento:** `format_version` não é cosmético — ele seleciona a
+interpretação do schema. Rebaixar pode fazer o motor **rejeitar** propriedades ou
+interpretá-las de outro modo. Em particular, `dappled_forest` e `sulfur_caves`
+declaram `minecraft:grass_appearance` com `color` em hexadecimal, forma que a
+documentação descreve como `Object` — o que torna o rebaixamento ainda mais
+arriscado.
+
+**Correção:** o gerador agora **preserva o formato de cada bioma**. E como
+`dappled_forest` usa `1.26.50`, o `min_engine_version` subiu de `[1, 26, 0]`
+para `[1, 26, 50]` — o mínimo coerente com o maior formato efetivamente usado. O
+validador passou a reprovar qualquer divergência entre o formato do arquivo e o
+da referência.
+
+Requisito de versão documentado para componentes (todas as satisfied por
+`1.21.120` ou superior):
+`minecraft:ambient_sounds` e `minecraft:biome_music` exigem no mínimo
+`1.21.50`.
+
+---
+
+## 13. Cobertura de cubemap (achado da auditoria)
+
+A documentação é explícita: *"Cubemap customization is only possible in the
+Overworld dimension. The End will continue to use its built-in cubemap."*
+
+O mapa anterior excluía `cba:cubemap_overworld` das famílias `hot`, `savanna` e
+`cave` — sendo que **todas são do Overworld**. Nenhuma justificativa técnica
+existia; foi inconsistência.
+
+**Correção:** regra explícita por dimensão, agora verificada:
+
+| Dimensão | Atribuição | Contagem |
+|---|---|---:|
+| Overworld | `cba:cubemap_overworld` obrigatório | 83 de 83 |
+| Nether | proibido | 5 de 5 sem |
+| End | proibido | 1 de 1 sem |
+
+O validador deixou de checar apenas "alguns casos proibidos" e passou a exigir a
+cobertura completa do Overworld **e** a ausência total em Nether/End.
+
+---
+
+## 14. Fog — o que a auditoria revelou
+
+Os 80 perfis de fog volumétrico do vanilla `v1.26.50.4` foram tabulados.
+Resultado:
+
+| Observação | Detalhe |
+|---|---|
+| **Rampa vertical nunca usada** | `zero_density_height` == `max_density_height` == `320.0` em **todos** os 80. `uniform` nunca aparece |
+| Densidades concentradas | `0.0` (sem névoa), `0.05` (a maioria), `0.07` (`pale_garden`, `sulfur_cave`), `0.25` (`the_end`) |
+| `default_fog_setting` | **não tem bloco `volumetric`** — no vanilla, túnel sob planície tem zero névoa |
+| `hell_fog_setting` | **não tem bloco `volumetric`** — o Nether vanilla não tem névoa volumétrica |
+
+**Consequências para este pack:**
+
+1. A rampa vertical usada nos perfis de superfície é um desenho **original**,
+   não um padrão do vanilla. Mantida por decisão técnica (é o único mecanismo que
+   dá alguma atmosfera a túneis sob biomas comuns), mas **documentada como não
+   verificada em jogo**.
+2. Os perfis de caverna, Nether e End usam alturas iguais (320) → densidade
+   **uniforme na altura**, não uma camada no chão. Uma caverna a Y=10 é igual a
+   uma a Y=200. A documentação anterior dizia o contrário em um teste; corrigido
+   e acrescentado o teste C10.
+3. Para bruma concentrada no chão seria preciso `max_density_height` **maior**
+   que `zero_density_height` — o oposto do que este pack faz.
+4. Comparação de intensidade: `fog_default` a 0.014 é 28% do `humid` vanilla
+   (0.05). Um vale a Y=40 fica com cerca de um terço da névoa de um bioma úmido
+   do jogo. Não excessivo, mas ainda não medido.
+
+---
+
+## 15. Fontes
 
 **Documentação oficial**
 - Creator: <https://learn.microsoft.com/en-us/minecraft/creator/>
@@ -381,6 +534,10 @@ névoa seja **exatamente zero** na maior parte do ar de superfície.
   <https://github.com/Mojang/bedrock-samples/tree/v1.26.50.4/resource_pack>
 - Pack de exemplo da Microsoft (referência secundária, desatualizado):
   <https://github.com/microsoft/minecraft-samples/tree/main/deferred_lighting_starter>
-- Notas de numeração de versão: <https://aka.ms/MinecraftVersionUpdate>
-- Histórico de versões Bedrock (wiki, **fonte secundária**):
-  <https://minecraft.wiki/w/Bedrock_Edition_version_history>
+- Notas de numeracao de versao: <https://aka.ms/MinecraftVersionUpdate>
+- Historico de versoes Bedrock (wiki, fonte secundaria): <https://minecraft.wiki/w/Bedrock_Edition_version_history>
+
+**Licenca da referencia oficial (fonte primaria)**
+- `Mojang/bedrock-samples` `LICENSE.md`: <https://github.com/Mojang/bedrock-samples/blob/v1.26.50.4/LICENSE.md>
+- `version.json` do repositorio (confirma `1.26.50.4` = 2026-09-15): <https://github.com/Mojang/bedrock-samples/blob/v1.26.50.4/version.json>
+- Minecraft End User License Agreement: <https://www.minecraft.net/en-us/eula>

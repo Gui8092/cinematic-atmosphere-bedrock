@@ -2,6 +2,21 @@ MIT License
 
 Copyright (c) 2026 Guilherme H. Schmitz
 
+Applies to: the original code and tooling in this repository (everything under
+tools/), the original configuration files authored for this pack (lighting/,
+atmospherics/, color_grading/, water/, fogs/, cubemaps/, manifest.json,
+pack_icon.png) and the documentation (README, CHANGELOG, docs/).
+
+IMPORTANT — SCOPE
+
+The 89 files under resource_pack/biomes/ embed a small number of *factual values*
+transcribed from the official Minecraft: Bedrock Edition reference pack published
+by Mojang AB (see NOTICE for the exact list and attribution). Those values are
+game identifiers (biome, sound-event and music-track names) and hexadecimal
+colour literals. They are not covered by the MIT grant above, and no Mojang
+asset — texture, model, sound, geometry, particle or animation — is contained in,
+or redistributed by, this repository.
+
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
@@ -23,8 +38,7 @@ SOFTWARE.
 ---
 
 Este projeto nao e um produto oficial da Mojang Studios nem da Microsoft.
-Minecraft e uma marca registrada de seus respectivosTitulares.
+Minecraft e uma marca registrada de seus respectivos titulares.
 Este add-on nao tem afiliacao com a Mojang Studios nem a Microsoft.
-
-Este projeto nao contem nenhuma textura, modelo, som ou outro recurso oficial
-do Minecraft. Todos os arquivos de configuracao sao gerados originalmente.
+Nao contem nenhuma textura, modelo, som, geometria ou outro recurso visual ou
+auditivo oficial do Minecraft.

@@ -4,12 +4,21 @@
 
 | | Valor |
 |---|---|
-| Versão mínima | `1.26.0` (`min_engine_version`) |
-| Versão de desenvolvimento | `1.26.50.x` (tag estável `v1.26.50.4`) |
+| Versão mínima | `1.26.50` (`min_engine_version: [1, 26, 50]`) |
+| Versão de desenvolvimento | `1.26.50.x` (tag estável `v1.26.50.4` da Mojang) |
 | SO alvo | Windows 10 / 11 |
 | Modo gráfico principal | **Vibrant Visuals** |
 | Modo gráfico secundário | Clássico (degradação limpa) |
 | Capability do manifesto | `pbr` |
+
+**Por que `1.26.50` e não `1.26.0`:** o arquivo de bioma de `dappled_forest` usa
+`format_version` `1.26.50` na referência oficial, e o pack preserva o
+`format_version` original de cada bioma em vez de rebaixá-lo. Rebaixar poderia
+mudar a interpretação do schema ou fazer o motor rejeitar propriedades. Logo, o
+mínimo coerente é a maior versão de formato efetivamente usada.
+
+Não há fallback para versão antiga: um `min_engine_version` menor permitiria
+ativar o pack numa versão em que parte dos arquivos seria inerte.
 
 ---
 
@@ -36,18 +45,22 @@
 
 | # | Risco | Impacto | Mitigação implementada |
 |---|---|---|---|
-| R1 | Vanilla por bioma sobrescreve os JSONs globais | Pack "não faz nada" | 89 `*.client_biome.json` + verificação de cobertura no `validate.ps1` |
-| R2 | Merge de `client_biome` entre packs não documentado | Perda de som/música/cores ao sobrescrever | Alteração mínima: componentes vanilla preservados verbatim; teste de fumaça em `the_end`, `sulfur_caves`, `pale_garden`, `swampland`, `ocean` |
-| R3 | `min_engine_version` inconsistente com `format_version` | Pack ativo mas inerte | `[1, 26, 0]` = maior `format_version` usado; sem fallback automático |
-| R4 | Keyframes em horários redondos (0.25/0.75) | Céu dessincronizado do sol | Horários exatos do vanilla como esqueleto |
-| R5 | Parâmetro não interpolável divergente entre arquivos | Transições com popping | `validate.ps1` compara `tone_mapping`, `orbital_offset_degrees`, `caustics`, `waves` |
-| R6 | Absorção de fog só em luminância | Neblina sem cor | Cor vem de `fog_color` + atmosfera + color grading |
-| R7 | Tone mapping filmico mais caro | Desempenho | `aces` escolhido por decisão artística; `"generic"` documentado como alternativa |
-| R8 | Névoo volumétrica em hardware fraco | Desempenho | Densidades baixas (0.010–0.055); `zero_density_height` alto deixa a área de superfície **exatamente** sem névoa |
-| R9 | Conflito com outro pack de iluminação | Visual imprevisível | README: ativar este pack **no topo** da lista |
-| R10 | Bioma novo em versão futura fica com visual vanilla | Inconsistência | `lighting/global.json`, `atmospherics/atmospherics.json`, `color_grading/color_grading.json` e `water/water.json` são default global para biomas sem atribuição explícita |
-| R11 | `dappled_forest` / `sulfur_caves` ausentes em versões antigas | — | `client_biome.json` extra é **inofensivo**: simplesmente não usado |
-| R12 | `shadows/` e `local_lighting/` com caminho não comprovado | Config ignorada | **Omitidos** com justificativa (`docs/inventory.md`) |
+| R1 | Vanilla por bioma sobrescreve os JSONs globais | Pack "nao faz nada" | 89 `*.client_biome.json` + verificacao de cobertura em tres lados (mapa, baseline, disco) |
+| R2 | Merge de `client_biome` entre packs **nao documentado** | Perda de som/musica/cores | Alteracao minima: componentes vanilla reproduzidos verbatim a partir de `tools\vanilla-baseline.json`; o validador compara o conteudo de cada bioma contra o baseline. Seguro sob as duas hipoteses (merge ou substituicao total) |
+| R3 | `min_engine_version` inconsistente com `format_version` | Pack ativo mas inerte | `[1, 26, 50]` = maior formato usado; o validador compara `min_engine_version` contra o maior `format_version` presente |
+| R4 | Rebaixar `format_version` de bioma | Propriedades rejeitadas ou mal interpretadas | O gerador **preserva** o formato da referencia por bioma (1.21.120 x87, 1.26.0 x1, 1.26.50 x1); o validador reprova qualquer divergencia |
+| R5 | Keyframes em horarios redondos (0.25/0.75) | Ceu dessincronizado do sol | Horarios exatos do vanilla como esqueleto |
+| R6 | Parametro nao interpolavel divergente | Transicoes com popping | `validate.ps1` compara `tone_mapping`, `orbital_offset_degrees`, `caustics`, `waves` |
+| R7 | Absorcao de fog so em luminancia | Neblina sem cor | Cor vem de `fog_color` + atmosfera + color grading |
+| R8 | Tone mapping filmico mais caro | Desempenho | `aces` por decisao artistica; `"generic"` documentado como alternativa |
+| R9 | Nevoa volumetrica em hardware fraco | Desempenho | Densidades 0.010 a 0.055 (o vanilla chega a 0.25 no End); `zero_density_height` alto deixa o ar de superficie **exatamente** sem nevoa |
+| R10 | Conflito com outro pack de iluminacao | Visual imprevisivel | README: ativar este pack **no topo** da lista |
+| R11 | Bioma novo em versao futura fica com visual vanilla | Inconsistencia | Os quatro arquivos de nome reservado servem de default global para biomas sem atribuicao explicita |
+| R12 | `shadows/` e `local_lighting/` com caminho nao comprovado | Config ignorada | **Omitidos** com justificativa (`docs/inventory.md`) |
+| R13 | Verificacao de seguranca do pacote com ponto cego | Bug escapado | `verify-package.ps1` e **autonomo** e tem **29 testes negativos** que provam que reprova; nao divide logica com o `validate.ps1` |
+| R14 | Build depender de rede | Irreprodutibilidade | Baseline vanilla versionado; caminho padrao 100% offline |
+| R15 | Procedencia legal dos valores transcritos | Reclamacao de direitos | `NOTICE` com atribuicao, escopo do MIT e limitacao declarada de que nao e parecer juridico |
+| R16 | Rampa vertical de fog nao e padrao do vanilla | Efeito diferente do esperado | Mantida por decisao tecnica, mas **documentada como original e nao verificada em jogo**; teste C10 confirma uniformidade dentro da caverna |
 
 ---
 
@@ -55,18 +68,49 @@
 
 ### 4.1 Testes automatizados — ✅ EXECUTADOS
 
-Ferramenta: `tools/validate.ps1`. **75 verificações, 0 falhas, 0 avisos.**
+`tools\validate.ps1` (offline, determinístico) e `tools\test-negative.ps1`.
+
+| Execução | Verificações | Falhas | Avisos |
+|---|---:|---:|---:|
+| `validate.ps1` (padrão, sem rede) | 73 | 0 | 0 |
+| `validate.ps1 -CheckOfficial` (com rede) | 75 | 0 | 0 |
+| `test-negative.ps1` | 29 | 0 | 0 |
 
 | Bloco | Cobre |
 |---|---|
 | `[A]` Estrutura e sintaxe | 7 diretórios obrigatórios, parse de todos os `.json` |
-| `[B]` Manifesto | `format_version`, campos de `header`, UUIDs no formato correto e **distintos**, módulo `resources`, capability `pbr`, `min_engine_version` |
-| `[C]` Integridade referencial | Todo `lighting`/`atmosphere`/`color_grading`/`water`/`fog`/`cubemap` identifier referenciado pelos 89 biomas **existe**; namespace `cba`; sem duplicados; arquivos reservados presentes; cobertura exata de 89 biomas; cubemap nunca atribuído a dimensão não-Overworld; componentes vanilla preservados |
-| `[D]` Schemas | `format_version` por tipo; coerência `min_engine_version`; 4 parâmetros não interpoláveis; `waves.enabled == false`; `operator == "aces"`; ranges de `ambient.illuminance`, `sky.intensity`, `caustics.power`, concentrações de partículas, `biome_water_color_contribution`, `temperature`, `contrast`/`gain`/`gamma`/`offset`/`saturation`, `shadowsMax < highlightsMin`, `fog_start < fog_end`, `max_density`, `zero_density_height >= max_density_height`, `henyey_greenstein_g`; keyframes com `0.0` e `1.0` |
-| `[E]` Não-invasão | Ausência de `textures`, `models`, `geometry`, `sounds`, `particles`, `entity`, `items`, `ui`, `textures_list.json`, `pbr`, `local_lighting`, `point_lights`, `shadows`; única imagem = `pack_icon.png`; nenhum arquivo de som |
+| `[B]` Manifesto | `format_version`, campos de `header`, UUIDs válidos e **distintos**, módulo `resources`, capability `pbr` |
+| `[C]` Referenciais e cobertura | Todo identificador referenciado **existe**; namespace `cba`; sem duplicados; arquivos reservados presentes; **cobertura em três lados** — mapa ↔ baseline ↔ disco, com contagens iguais; `format_version` de cada bioma **igual ao da referência**; componentes preservados **idênticos ao baseline**; **regra de cubemap explícita** (Overworld deve ter, Nether/End nunca); comparação opcional com a referência oficial viva |
+| `[D]` Versões | `format_version` por tipo de arquivo contra o conjunto aceito; distribuição por bioma; `min_engine_version` ≥ maior formato usado |
+| `[E]` Schemas | 4 parâmetros não interpoláveis; `waves.enabled == false`; `operator == aces`; ranges de `ambient`, `sky`, `caustics`, partículas, `biome_water_color_contribution`, `temperature`, `contrast`/`gain`/`gamma`/`offset`/`saturation`, `shadowsMax < highlightsMin`, `fog_start < fog_end`, `max_density`, `zero_density_height ≥ max_density_height`, `henyey_greenstein_g`; ciclos de keyframe |
+| `[F]` Procedência | Ausência de pastas de textura/modelo/som/material; única mídia = `pack_icon.png`; nenhum som; nenhum script; baseline declara repositorio, tag e licença |
 
-Empacotamento: **✅ executado** — 130 entradas, ZIP plano,
-`manifest.json` na raiz, SHA256 registrado por `build.ps1`.
+`tools\verify-package.ps1` — **autônomo**, não depende do `validate.ps1`:
+`manifest.json` na raiz, separadores `/`, diretórios e extensões proibidas,
+whitelist estrita de caminhos, CRC de todas as entradas, contagem de entradas.
+
+`tools\test-negative.ps1` prova que o verificador **reprova** o que deve
+reprovar: 12 diretórios proibidos, 10 extensões proibidas, 7 casos de whitelist,
+1 contagem errada, 1 pacote vazio, e 1 controle positivo.
+
+### 4.2 Empacotamento — ✅ EXECUTADO
+
+130 entradas, `manifest.json` na raiz, separadores `/`, CRC íntegro,
+`verify-package.ps1` APROVADO, SHA-256 registrado por `build.ps1`.
+
+### 4.3 Dependência de rede
+
+| Comando | Rede |
+|---|---|
+| `validate.ps1` | **Não** (padrão) |
+| `validate.ps1 -CheckOfficial` | **Sim** — opcional; sem rede emite **aviso** e não falha (verificado) |
+| `test-negative.ps1` | Não |
+| `verify-package.ps1` | Não |
+| `build.ps1` | Não |
+| `generate-biomes.ps1` | Não (usa `tools\vanilla-baseline.json`) |
+| `generate-biomes.ps1 -SyncBaseline` | **Sim** — única operação que baixa a referência |
+
+O caminho padrão é totalmente offline e reproduzível.
 
 ### 4.2 Testes visuais dentro do Minecraft — ⏳ NÃO EXECUTADOS
 
@@ -104,15 +148,16 @@ Empacotamento: **✅ executado** — 130 entradas, ZIP plano,
 
 | # | Cenário | Critério de aceitação |
 |---|---|---|
-| C1 | Dripstone cave natural (Y ≈ 10–40) | Bruma cresce com a profundidade; `distance.air` encurta; ainda legível |
-| C2 | Lush cave | Mesma densidade, com o verde do bioma |
+| C1 | Dripstone cave natural (Y ≈ 10–40) | Densidade **uniforme** (não cresce com a profundidade — `zero_density_height` = `max_density_height` = 320); `distance.air` encurta; ainda legível |
+| C2 | Lush cave | Mesma densidade uniforme, com o verde do bioma vindo do `fog_color` |
 | C3 | Sulfur cave (Y ≈ −20 a 40) | **O verde vem do `fog_color`, não do `absorption`** — confirmar que sobrevive |
 | C4 | Deep dark / sculk | Escuridão máxima; `ambient` no piso; tocha com halo contido |
-| C5 | **Túnel sob planícies (Y ≈ 12)** | Bruma modesta + tom frio; confirmar que **não** é tão densa quanto C1 (limitação documentada) |
-| C6 | Mesmo túnel a Y ≈ 10 vs Y ≈ 100 | Gradiente vertical visivelmente diferente |
-| C7 | **Regressão de superfície**: vale de planícies a Y ≈ 40 | Névoa **subtil**, paisagem **não** encoberta — teste de regressão do piso universal |
+| C5 | **Túnel sob planícies (Y ≈ 12)** | Usa o perfil de superfície: bruma modesta + tom frio; confirmar que **não** é tão densa quanto C1 (limitação documentada) |
+| C6 | Túnel sob planícies: Y ≈ 10 vs Y ≈ 100 | **Aqui sim há gradiente** (`zero_density_height` 128 → `max_density_height` 48). Esperado: mais bruma em Y=10 |
+| C7 | **Regressão de superfície**: vale de planícies a Y ≈ 40 | Névoa **subtil** (0.014, ~28% do vanilla), paisagem **não** encoberta — teste de regressão do piso universal |
 | C8 | Teto do Nether (Y ≈ 120) e do End (Y ≈ 240) | Densidade coerente com os perfis por dimensão |
 | C9 | Render distance 4 vs 16 chunks | As cavernas usam `fixed`, então não devem mudar |
+| C10 | Uma caverna a Y=10 vs outra a Y=200, mesmo bioma | **Idênticas** — confirma que o perfil é uniforme na altura e não uma camada no chão |
 
 #### Integração e sanidade
 

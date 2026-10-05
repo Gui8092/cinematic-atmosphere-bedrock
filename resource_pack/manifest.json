@@ -4,8 +4,8 @@
     "name": "Cinematic Atmosphere",
     "description": "Cinematic lighting, sky, volumetric fog and color grading. Requires Vibrant Visuals.",
     "uuid": "d5ff3e6f-9ac6-425d-bf42-78d0eca5128e",
-    "version": [1, 0, 0],
-    "min_engine_version": [1, 26, 0],
+    "version": [1, 0, 1],
+    "min_engine_version": [1, 26, 50],
     "pack_scope": "any"
   },
   "modules": [
