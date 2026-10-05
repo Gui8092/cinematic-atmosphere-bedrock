@@ -49,8 +49,8 @@ keyframe do vanilla**, com valores próprios. Ver `docs/research.md` § 5.1.
 - Realces contidos: `highlights` com `gain` levemente < 1 nas famílias quentes.
 
 **Amanhecer e pôr do sol**
-- `sun.color` interpolando de `[255,251,246]` (meio-dia quase neutro) para
-  `[255,163,104]` / `[214,150,108]` no crepúsculo.
+- `sun.color` interpolando de `[255,238,229]` (meio-dia levemente quente) para
+  `[255,143,47]` no pôr do sol e `[255,197,134]` na hora dourada.
 - `sun_mie_strength` com pico em `0.265` e `0.735` (1.10) — o **brilho ao redor
   do sol**, que é o efeito mais cinematográfico do céu.
 - `sun_glare_shape` de 0.09 nesses mesmos picos: o lóbulo de Mie que dá o halo.
@@ -58,6 +58,87 @@ keyframe do vanilla**, com valores próprios. Ver `docs/research.md` § 5.1.
   (crepúsculo) e voltando: a faixa quente **avança e recua** com o sol.
 - `rayleigh_strength` cai de 10.0 a 2.2 à noite: a noite fica **de fato escura**,
   em vez de azul-lavada.
+
+### A cor do sol é a cor da luz — saturação, não croma (v1.1.0)
+
+> ⚠️ **Correção de 2026-10-05.** Até a v1.0.3 a cor do sol era **lavada**: o
+> vanilla põe `[255,127,0]` no pôr do sol (saturação máxima), este pack usava
+> `[255,163,104]`. A intenção era "naturalista", mas a alavanca estava errada.
+
+O sol **é** a fonte da luz que bate no terreno. Desaturar a cor do sol não
+deixa o resultado naturalista — deixa **errado**. Fotos de hora dourada têm luz
+laranja intensa. Naturalismo vem de contraste e curva tonal, não de tirar cor da
+fonte.
+
+A métrica usada é o **spread** = `max(canal) − min(canal)`: 0 é cinza puro, 255
+é a cor mais saturada que o canal permite. O vanilla **não** usa a mesma
+intensidade em todos os horários — é máximo no pôr do sol e bem mais suave na
+hora dourada:
+
+| Horário | Vanilla | `global` antes | depois | `cold` antes | depois |
+|---|---:|---:|---:|---:|---:|
+| `0.242908` pôr do sol | 255 | 151 | **208** | 88 | **180** |
+| `0.269504` | 255 | 163 | **214** | 80 | **177** |
+| `0.140811` hora dourada | 174 | 57 | **121** | 26 | **108** |
+| `0.801062` manhã dourada | 174 | 69 | **127** | 32 | **110** |
+
+`cold` era o pior caso do pack: spread 26 na hora dourada, contra 174 do vanilla.
+
+A regra aplicada nas 8 famílias de Overworld foi uniforme e reprodutível:
+
+```
+nova = vanilla + 0,45 × (nosso_anterior − vanilla)
+```
+
+Cada família mantém **45% do seu desvio** do vanilla — então `cold` continua mais
+frio, `hot` mais quente — e ganha 55% da saturação do vanilla. O resultado não
+é uma cópia do vanilla: o pôr do sol da família `cold` é `[251,153,71]` e o da
+`hot` é `[255,149,49]`.
+
+> O meio-dia também mudou, de `[255,251,246]` para `[255,238,229]`. Não é
+> arbitrário: o sol do vanilla ao meio-dia **já é** quente (`[255,227,215]`), e
+> o azul do céu vem do Rayleigh, não da cor do sol.
+
+### O violeta do crepúsculo — a faixa mais cinematográfica do ciclo
+
+Logo após o pôr do sol e antes do nascer do sol existe uma faixa **violeta**. É o
+momento mais bonito do ciclo, e era justamente o mais apagado deste pack:
+
+| Horário | Vanilla | Antes (`global`) | **Depois** |
+|---|---|---|---|
+| `0.361464` crepúsculo noturno | `[168,168,238]` | `[120,122,176]` | **`[164,162,238]`** |
+| `0.654508` alvorada | `[144,144,238]` | `[126,126,178]` | **`[148,146,240]`** |
+| `0.706861` alvorada | `[223,187,237]` | `[178,158,194]` | **`[219,184,236]`** |
+
+A soma das diferenças por canal era **156** em `0.361464` — 4× maior que em
+qualquer outro horário do horizonte. O desvio estava concentrado exatamente onde
+o vanilla é mais expressivo.
+
+Os alvos foram escolhidos por mão, preservando o tint de cada família: `cold`
+fica mais azul (`[168,170,242]`), `hot` mais quente (`[224,180,230]`).
+
+Também foi **removida a chave `0.314561`** do horizonte, que **não existe no
+vanilla**. Ela preenchia o espaço entre o dusk quente e o violeta com
+`[150,128,168]` — um cinza-roxo sem saturação que **aduava** justamente a
+transição que queríamos ver. Sem ela, o vanilla salta de `[136,108,108]` para
+`[168,168,238]` e o crepúsculo **estala** em violeta.
+
+### Tabela de reversão
+
+Todos os valores alterados na v1.1.0, para reverter campo a campo:
+
+| Arquivo | Campo | Antes | Depois |
+|---|---|---|---|
+| `lighting/global.json` | `sun.color.0.242908` | `[255,163,104]` | `[255,143,47]` |
+| `lighting/global.json` | `sun.color.0.140811` | `[255,226,198]` | `[255,197,134]` |
+| `lighting/global.json` | `sun.color.1.000000` | `[255,251,246]` | `[255,238,229]` |
+| `atmospherics/atmospherics.json` | `sky_horizon_color.0.361464` | `[120,122,176]` | `[164,162,238]` |
+| `atmospherics/atmospherics.json` | `sky_horizon_color.0.314561` | `[150,128,168]` | **removida** |
+
+O mesmo padrão vale para as outras 7 famílias de lighting e as outras 2
+atmosferas; os valores estão em `dist/` das releases v1.0.3 e v1.1.0 para
+comparação direta. `git diff v1.0.3..v1.1.0 -- resource_pack/` dá a lista
+completa.
 
 **Noite**
 - Luar 0.26–0.42, cor `#A8BEF0`-``#BCC4F0` (frio).

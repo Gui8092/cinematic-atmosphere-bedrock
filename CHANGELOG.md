@@ -4,6 +4,126 @@ Todas as mudanças relevantes deste resource pack.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 Versionamento do pack segue SemVer no `manifest.json`.
 
+## [1.1.0] — 2026-10-05
+
+Correção de direção de arte. **84 valores** em 11 arquivos, todos concentrados
+em dois pontos: a cor do sol na hora dourada e o violeta do crepúsculo.
+
+Escopo deliberadamente limitado: **color grading e a noite não foram tocados**,
+porque exigem teste dentro do jogo para ser calibrados. Ver "Não foi alterado".
+
+## A cor do sol estava lavada — esta era a maior diferença em relação ao vanilla
+
+A cor do sol **é** a cor da luz que bate no terreno. O vanilla a satura
+deliberadamente no pôr do sol: `[255,127,0]`, o máximo que o canal permite.
+Este pack usava `[255,163,104]`.
+
+A intenção original era "naturalista", mas **a alavanca estava errada**.
+Desaturar a cor do sol não deixa o resultado naturalista — deixa errado. Fotos de
+hora dourada têm luz laranja intensa. Naturalismo vem de contraste e curva
+tonal, não de tirar cor da fonte de luz.
+
+Métrica: **spread** = `max(canal) − min(canal)`. 0 é cinza puro, 255 é
+saturação máxima.
+
+| Horário | Vanilla | `global` antes | depois | `cold` antes | depois |
+|---|---:|---:|---:|---:|---:|
+| `0.242908` pôr do sol | 255 | 151 | **208** | 88 | **180** |
+| `0.269504` | 255 | 163 | **214** | 80 | **177** |
+| `0.140811` hora dourada | 174 | 57 | **121** | 26 | **108** |
+| `0.801062` manhã dourada | 174 | 69 | **127** | 32 | **110** |
+
+`cold` era o pior caso do pack: spread 26 na hora dourada contra 174 do vanilla.
+
+A regra aplicada nas 8 famílias de Overworld foi uniforme e reprodutível:
+
+```
+nova = vanilla + 0,45 × (nosso_anterior − vanilla)
+```
+
+Cada família mantém 45% do seu desvio do vanilla — `cold` continua mais frio,
+`hot` mais quente — e ganha 55% da saturação do vanilla. Não é uma cópia: o pôr
+do sol de `cold` é `[251,153,71]`, o de `hot` é `[255,149,49]`.
+
+O meio-dia mudou de `[255,251,246]` para `[255,238,229]`. Não é arbitrário: o
+sol do vanilla ao meio-dia **já é** quente (`[255,227,215]`), e o azul do céu vem
+do Rayleigh, não da cor do sol.
+
+## O violeta do crepúsculo — o momento mais bonito do dia era o mais apagado
+
+Logo após o pôr do sol e antes do nascer do sol existe uma faixa violeta:
+
+| Horário | Vanilla | Antes | **Depois** |
+|---|---|---|---|
+| `0.361464` crepúsculo noturno | `[168,168,238]` | `[120,122,176]` | **`[164,162,238]`** |
+| `0.654508` alvorada | `[144,144,238]` | `[126,126,178]` | **`[148,146,240]`** |
+| `0.706861` alvorada | `[223,187,237]` | `[178,158,194]` | **`[219,184,236]`** |
+
+A soma das diferenças por canal era 156 em `0.361464` — 4× maior que em
+qualquer outro horário do horizonte. O desvio estava concentrado exatamente onde
+o vanilla é mais expressivo.
+
+Foi **removida a chave `0.314561`** do horizonte, que não existe no vanilla. Ela
+preenchia o espaço entre o dusk quente e o violeta com `[150,128,168]` — um
+cinza-roxo sem saturação que aduava a transição que queríamos ver. Sem ela o
+crepúsculo **estala** em violeta.
+
+Alvos escolhidos por mão, preservando o tint de cada família: `cold` mais azul
+(`[168,170,242]`), `hot` mais quente (`[224,180,230]`).
+
+## Verificações novas (2 blocos, 8+8 checagens)
+
+**Piso de saturação do sol**, por horário. Escolhido a partir dos valores reais de
+antes e depois, para reprovar a versão lavada e aprovar a atual com folga:
+
+| Horário | Piso | Pior família antes | Pior depois |
+|---|---:|---:|---:|
+| `0.242908`, `0.269504` | 150 | `cold` 80 | `cold` 177 |
+| `0.140811`, `0.801062` | 90 | `cold` 26 | `cold` 108 |
+
+**Violeta do crepúsculo**: spread mínimo de 60 em `0.361464` e `0.654508`, mais
+uma exigência de que **B seja o canal mais alto** — uma cor clara com spread alto
+mas sem azul dominante não passa.
+
+**Testado nos dois sentidos.** Cada uma das 8 famílias de lighting foi
+reintroduzida individualmente na versão lavada e todas foram reprovadas (2 a 4
+falhas cada). As 3 atmosferasidem. Um violeta convertido em cinza-azulado
+(`[200,205,198]`) é reprovado pelos dois critérios.
+
+> Nota de honestidade: na primeira versão do piso eu use um valor único de 140
+> para todos os horários, e ele **reprovava a hora dourada correta**. O piso foi
+> recalibrado por horário. Do mesmo modo, o primeiro teste negativo "passou" —
+> porque o regex não casava com o espaçamento real do JSON (`[ 255, 143, 47 ]`),
+> ou seja, o teste não estava alterando nada. Os dois foram corrigidos e
+> repetidos.
+
+## Não foi alterado (deliberadamente)
+
+- **Color grading** — o contraste global (1,12) está abaixo do vanilla (1,15) e
+  os offsets de split-tone (0,008–0,016) são provavelmente imperceptíveis.
+  Provavelmente é a próxima correção, mas **não** foi aplicada aqui: mexer em
+  contraste e split-tone muda o look de tudo ao mesmo tempo, e isso exige ver.
+- **A noite** — `rayleigh_strength` noturno está em 2,2 contra 5,0 do vanilla,
+  `ambient` em 0,010 contra 0,02, e o luar em 0,34 contra 0,4. Quatro reduções
+  empilhadas podem deixar a noite **escura demais para navegar**, o que seria
+  regressão de jogabilidade. Precisa de teste in-game antes de qualquer ajuste.
+
+## Validação
+
+| Execução | Verificações | Falhas | Avisos |
+|---|---:|---:|---:|
+| `validate.ps1` (offline) | 98 | 0 | 0 |
+| `validate.ps1 -CheckOfficial` | 103 | 0 | 0 |
+| `test-negative.ps1` | 29 | 0 | 0 |
+
+## Reversão
+
+A tabela completa de valores alterados está em `docs/art-direction.md`
+("Tabela de reversão"). `git diff v1.0.3..v1.1.0 -- resource_pack/` dá a lista
+completa.
+
+---
+
 ## [1.0.3] — 2026-10-05
 
 Revisão completa do projeto. **Um bug de alcance visual grave** e três bugs de

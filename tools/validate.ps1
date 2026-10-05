@@ -420,6 +420,80 @@ foreach ($key in ($legFloor.Keys | Sort-Object)) {
         $key, $tag, [int]$startB, [int]$endB, [int]$vanStart[$key], $ratio)
 }
 
+# --- saturacao da cor do sol e o violeta do crepusculo ----------------------
+# A cor do sol E a cor da luz que bate no terreno. O vanilla a satura
+# deliberadamente no por do sol: [255,127,0], spread 255 (o maximo possivel).
+# ate a v1.0.3 este pack a lavava para [255,163,104] (spread 91) em TODAS as 8
+# familias de Overworld — e nenhum teste pegava, porque o valor continuava
+# dentro do intervalo do schema.
+#
+# "spread" = max(canal) - min(canal): 0 e cinza puro, 255 e a cor mais
+# saturada que o canal permite. E a metrica mais direta de "quanto de cor".
+function Get-Spread($c) {
+    if (-not $c) { return -1 }
+    $vals = @($c)
+    if ($vals.Count -ne 3) { return -1 }
+    return (@($vals | Measure-Object -Maximum).Maximum) - (@($vals | Measure-Object -Minimum).Minimum)
+}
+
+# piso por horario = 55% do spread do vanilla, para a familia poder ser mais
+# fria ou mais quente sem ser lavada. O vanilla NAO usa a mesma intensidade em
+# todos os horarios: e maximumamente saturado no por do sol (255) e bem menos
+# na hora dourada (174). Um piso unico de 140 reprovaria a hora dourada, que
+# e corretamente mais suave.
+# piso por horario, escolhido a partir dos valores REAIS de antes e depois:
+#   por do sol  : pior familia antes = cold  80  |  pior depois = cold 177  -> piso 150
+#   hora dourada: pior familia antes = cold  26  |  pior depois = cold 108  -> piso  90
+# O piso fica entre os dois, entao reprova a versao lavada e aprova a atual,
+# com folga nas duas pontas.
+$cbaSunFloor = @{ '0.242908' = 150; '0.269504' = 150; '0.140811' = 90; '0.801062' = 90 }
+foreach ($cbaFam in @('global', 'cold', 'forest', 'hot', 'mountain', 'ocean', 'swamp', 'cave')) {
+    $cbaFile = Join-Path $pack "lighting\$cbaFam.json"
+    if (-not $parsed.ContainsKey($cbaFile)) { continue }
+    $cbaSun = $parsed[$cbaFile].'minecraft:lighting_settings'.directional_lights.orbital.sun.color
+    if (-not $cbaSun) { continue }
+    foreach ($cbaK in ($cbaSunFloor.Keys | Sort-Object)) {
+        $cbaSp = Get-Spread $cbaSun.$cbaK
+        if ($cbaSp -lt 0) { Fail "lighting/$cbaFam : cor do sol sem 3 canais em $cbaK" ; continue }
+        if ($cbaSp -lt $cbaSunFloor[$cbaK]) {
+            Fail ("lighting/{0} : sol em {1} tem spread {2} (quase cinza); piso e {3}. Vanilla usa 255 no por do sol. Satura." -f $cbaFam, $cbaK, $cbaSp, $cbaSunFloor[$cbaK])
+        }
+    }
+    Ok ("lighting/{0,-9} spread do sol: por do sol {1,3}, hora dourada {2,3} (piso {3}/{4})" -f `
+        $cbaFam, (Get-Spread $cbaSun.'0.242908'), (Get-Spread $cbaSun.'0.140811'), $cbaSunFloor['0.242908'], $cbaSunFloor['0.140811'])
+}
+
+# o violeta do crepusculo e a faixa mais cinematografica do ciclo: logo apos o
+# por do sol e antes do nascer do sol. O vanilla usa azul 238 la. ate a v1.0.3
+# este pack usava 176-178 — o momento mais bonito do dia era o mais apagado.
+#
+# ATENCAO: as variaveis deste bloco usam prefixo $cbaTw de proposito. A primeira
+# versao usava $f e $h, que colidiram com o cabecalho do manifesto lido no
+# inicio do script ($h = $m.header). O bloco [F], que le
+# $h.min_engine_version, passava a ver vazio e reprovava com uma mensagem
+# enganosa sobre o .mcpack.
+$cbaTwFloor = 60
+foreach ($cbaTwFam in @('atmospherics', 'cold', 'hot')) {
+    $cbaTwFile = Join-Path $pack "atmospherics\$cbaTwFam.json"
+    if (-not $parsed.ContainsKey($cbaTwFile)) { continue }
+    $cbaTwHorizon = $parsed[$cbaTwFile].'minecraft:atmosphere_settings'.sky_horizon_color
+    if (-not $cbaTwHorizon) { continue }
+    foreach ($cbaTwK in @('0.361464', '0.654508')) {
+        $cbaTwSp = Get-Spread $cbaTwHorizon.$cbaTwK
+        if ($cbaTwSp -lt 0) { Fail "atmospherics/$cbaTwFam : horizonte sem 3 canais em $cbaTwK" ; continue }
+        if ($cbaTwSp -lt $cbaTwFloor) {
+            Fail ("atmospherics/{0} : crepusculo em {1} tem spread {2} (sem violeta); piso e {3}" -f $cbaTwFam, $cbaTwK, $cbaTwSp, $cbaTwFloor)
+        }
+        # o violeta e azul-dominante: B tem de ser o canal mais alto
+        $cbaTwV = @($cbaTwHorizon.$cbaTwK)
+        if ($cbaTwV[2] -le $cbaTwV[0]) {
+            Fail ("atmospherics/{0} : crepusculo em {1} nao e violeta - B={2} deveria superar R={3}" -f $cbaTwFam, $cbaTwK, $cbaTwV[2], $cbaTwV[0])
+        }
+    }
+    Ok ("atmospherics/{0,-9} spread do crepusculo = {1} / {2} (piso {3}, azul-dominante)" -f `
+        $cbaTwFam, (Get-Spread $cbaTwHorizon.'0.361464'), (Get-Spread $cbaTwHorizon.'0.654508'), $cbaTwFloor)
+}
+
 # ============================ [F] procedencia e nao-invasao =================
 Write-Host "`n[F] procedencia e nao-invasao" -ForegroundColor Cyan
 

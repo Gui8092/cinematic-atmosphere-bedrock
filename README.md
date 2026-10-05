@@ -188,7 +188,7 @@ Todas em PowerShell, **sem dependências externas**. O caminho padrão é
 **100% offline** — a única operação que acessa a rede é o `-SyncBaseline`.
 
 ```powershell
-.\tools\validate.ps1                        # 90 verificações estáticas (offline)
+.\tools\validate.ps1                        # 98 verificações estáticas (offline)
 .\tools\validate.ps1 -CheckOfficial         # + 2: compara com a referência oficial (requer internet)
 .\tools\validate.ps1 -SkipArtifact         # usado por build.ps1 antes de empacotar
 .\tools\fog-report.ps1                    # densidade de fog por altura vs vanilla
@@ -238,9 +238,9 @@ completa, com as categorias de conteúdo e as citações do EULA, está em
 
 | Categoria | Estado |
 |---|---|
-| Testes estáticos (sintaxe, manifesto, referências, versões, schemas, procedência, BOM, alcance do fog, artefato) | ✅ **Executados — 90 verificações, 0 falhas, 0 avisos** |
+| Testes estáticos (sintaxe, manifesto, referências, versões, schemas, procedência, BOM, alcance do fog, artefato) | ✅ **Executados — 98 verificações, 0 falhas, 0 avisos** |
 | Testes negativos do verificador de pacote | ✅ **Executados — 29 casos, 0 falhas** |
-| Comparação com a referência oficial (com rede) | ✅ **Executado — 92 verificações, inventário idêntico aos 89 biomas** |
+| Comparação com a referência oficial (com rede) | ✅ **Executado — 103 verificações, inventário idêntico aos 89 biomas** |
 | Empacotamento e estrutura do `.mcpack` | ✅ **Executado** — 130 entradas, `manifest.json` na raiz, SHA256 registrado |
 | **Testes visuais dentro do Minecraft** | ⏳ **NÃO executados** — exige acesso ao jogo e a hardware |
 | **Medição de desempenho / FPS** | ⏳ **NÃO executada** — nenhum número de FPS é alegado |
