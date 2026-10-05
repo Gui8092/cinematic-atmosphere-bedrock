@@ -155,11 +155,11 @@ Todos os 7 arquivos de `color_grading/` têm `shadows` e `highlights` com
 | Família | `shadows.offset` (frio) | `highlights.offset` (quente) | Contraste | Temperatura |
 |---|---|---|---|---|
 | `cg_overworld` | `[-0.010, -0.004, +0.012]` | `[+0.012, +0.004, -0.008]` | 1.12 | 6500 K |
-| `cg_cold` | `[-0.010, -0.004, +0.014]` | `[+0.004, +0.006, +0.012]` | 1.10 | 8200 K |
+| `cg_cold` | `[-0.010, -0.004, +0.014]` | `[+0.004, +0.006, +0.012]` | 1.10 | 5200 K |
 | `cg_hot` | `[-0.006, -0.002, +0.008]` | `[+0.014, +0.004, -0.010]` | 1.14 | 7200 K |
 | `cg_swamp` | `[-0.008, 0.000, -0.002]` (verde) | `[+0.008, +0.004, -0.004]` | 1.12 | 6600 K |
 | `cg_cave` | `[-0.014, -0.008, +0.016]` | `[+0.004, +0.004, +0.006]` | 1.22 | 5200 K |
-| `cg_nether` | `[-0.008, -0.008, -0.006]` | `[+0.002, -0.002, -0.006]` | 1.18 | 3400 K |
+| `cg_nether` | `[-0.008, -0.008, -0.006]` | `[+0.002, -0.002, -0.006]` | 1.18 | 7200 K |
 | `cg_end` | `[-0.010, -0.010, +0.008]` | `[+0.004, 0.000, +0.012]` | 1.20 | 4600 K |
 
 Sombras frias + realces quentes é a assinatura cinema-digital padrão e resolve
@@ -169,6 +169,26 @@ boa parte do pedido de "tonalidade das sombras e realces".
 `highlightsMin` é 1.35 (caverna) e 1.40 (Nether), com `gain` < 1. Isso impede
 que uma tocha ou a lava vire um borrão branco. No Nether é o que evita o
 "cenário fluorescente".
+
+### Direção da temperature (v1.3.0)
+
+> ⚠️ **Correção de 2026-10-05.** Com `type: color_temperature`, valores **altos
+> esquentam** a imagem e valores **baixos esfriam** (spec oficial). Até a v1.2.1,
+> `cold` usava 8200 K (esquentando um bioma de neve) e `nether` usava 3400 K
+> (esfriando a dimensão do fogo) — o inverso da intenção documentada. É a
+> confusão clássica: uma lâmpada de 3400 K *é* laranja, mas dizer ao motor "a
+> luz é 3400 K" faz ele *esfriar* a imagem para compensar.
+
+| Família | Antes | Depois | Efeito |
+|---|---|---:|---|
+| `cold` | 8200 K | **5200 K** | esfria, como `cave` |
+| `nether` | 3400 K | **7200 K** | esquenta, como `hot` |
+
+Os valores novos reutilizam âncoras já existentes no pack, em vez de inventar
+números. `validate.ps1` agora codifica a intenção: famílias frias (`cold`,
+`cave`, `end`) não podem passar de 6500 K, famílias quentes (`hot`, `nether`)
+não podem ficar abaixo. Testado nos dois sentidos: os valores antigos são
+reprovados.
 
 **Tone mapping: `aces`.** Curva filmic que comprime os realces em vez de
 estourá-los. É o que faz o sol forte do deserto não virar um patch branco.
@@ -366,8 +386,10 @@ exatos do vanilla.
 - Atmosfera: zênite `[46,14,10]`, horizonte `[122,42,16]`, `rayleigh_strength`
   0.15 (o vanilla também usa 0.15).
 - `distance.air` 0.03 → 0.26: o mundo **fecha rápido**.
-- `cg_nether` a 3400 K com `highlights` contidos: tons quentes, zero
-  fluorescência.
+- `cg_nether` a 7200 K com `highlights` contidos: tons quentes, zero
+  fluorescência. (Até a v1.2.1 eram 3400 K, que **esfriam** a imagem com
+  `type: color_temperature` — o inverso da intenção documentada. Ver §"Direção
+  da temperature" abaixo.)
 
 **End** — isolamento.
 - `ambient` `#6A5A9E @ 0.075`, `sky.intensity` 0.3.

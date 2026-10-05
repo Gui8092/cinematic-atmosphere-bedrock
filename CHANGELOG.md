@@ -4,6 +4,53 @@ Todas as mudanças relevantes deste resource pack.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 Versionamento do pack segue SemVer no `manifest.json`.
 
+## [1.3.0] — 2026-10-05
+
+Correção de direção de arte: a `temperature` de `cold` e `nether` fazia o
+**oposto** da intenção documentada. Mudança visual perceptível — por isso minor.
+
+## A temperature estava invertida em duas famílias
+
+Com `type: color_temperature`, valores **altos esquentam** a imagem e valores
+**baixos esfriam** (spec oficial do Mojang). O pack fazia o inverso em duas
+famílias:
+
+| Família | Antes | Efeito real | Depois | Efeito |
+|---|---|---|---|---|
+| `cold` (neve) | 8200 K | esquentava | **5200 K** | esfria |
+| `nether` (fogo) | 3400 K | esfriava | **7200 K** | esquenta |
+
+O `art-direction.md` dizia "`cg_nether` a 3400 K: tons quentes" — a intenção
+documentada era o oposto do que o valor fazia. É a confusão clássica entre "luz
+de 3400 K" (lâmpada laranja) e "balancear para 3400 K" (o motor esfria a imagem
+para compensar). As outras 5 famílias já estavam consistentes (`hot` 7200
+esquenta, `cave` 5200 e `end` 4600 esfriam), o que indica engano nessas duas —
+não decisão.
+
+Os valores novos reutilizam âncoras já existentes (`cave`, `hot`), em vez de
+inventar números.
+
+## Check novo: direção da temperature
+
+`validate.ps1` codifica a intenção: famílias frias (`cold`, `cave`, `end`) não
+passam de 6500 K; famílias quentes (`hot`, `nether`) não ficam abaixo; neutras
+(`overworld`, `swamp`) sem restrição. **Testado nos dois sentidos**: `cold` de
+volta a 8200 e `nether` de volta a 3400 são reprovados com a direção errada
+nomeada na mensagem.
+
+## Validação
+
+| Execução | Verificações | Falhas | Avisos |
+|---|---:|---:|---:|
+| `validate.ps1` (offline) | 115 | 0 | 0 |
+| `validate.ps1 -CheckOfficial` | 117 | 0 | 0 |
+| `test-negative.ps1` | 29 | 0 | 0 |
+
+Testes visuais e de desempenho continuam **não executados**. O Nether deve ler
+visivelmente mais quente e a neve visivelmente mais fria — confirme no jogo.
+
+---
+
 ## [1.2.1] — 2026-10-05
 
 Caçada completa a bugs no projeto inteiro, com correções. Nada de arte alterada:

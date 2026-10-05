@@ -499,6 +499,34 @@ foreach ($cbaF in Get-ChildItem (Join-Path $pack 'color_grading') -Filter *.json
 }
 Ok 'enums oficiais conferidos (temperature.type, tone_mapping.operator)'
 
+# --- direcao da temperature: com type=color_temperature, valores ALTOS
+# esquentam a imagem e valores BAIXOS esfriam (spec oficial). Ate a v1.2.1,
+# cold usava 8200 (esquentando um bioma de neve) e nether usava 3400
+# (esfriando a dimensao do fogo) — o inverso da intencao documentada
+# ("tons quentes" para o nether). A regra abaixo codifica intencao, nao fisica:
+# familias frias nao podem esquentar (<= 6500), familias quentes nao podem
+# esfriar (>= 6500). Familias neutras (overworld, swamp) sem restricao.
+$cbaTempCold = @('cold', 'cave', 'end')
+$cbaTempHot = @('hot', 'nether')
+foreach ($cbaTf in Get-ChildItem (Join-Path $pack 'color_grading') -Filter *.json) {
+    if (-not $parsed.ContainsKey($cbaTf.FullName)) { continue }
+    $cbaTg = $parsed[$cbaTf.FullName].'minecraft:color_grading_settings'.color_grading.temperature
+    if (-not $cbaTg -or $cbaTg.type -ne 'color_temperature') { continue }
+    $cbaTv = [double]$cbaTg.temperature
+    $cbaTn = $cbaTf.Name.Replace('.json', '')
+    if ($cbaTn -eq 'color_grading') { $cbaTn = 'overworld' }
+    if ($cbaTempCold -contains $cbaTn -and $cbaTv -gt 6500) {
+        Fail ("color_grading/{0}: temperature {1} K ESQUENTA a imagem, mas a familia e fria (teto 6500 K)" -f $cbaTf.Name, $cbaTv)
+    }
+    elseif ($cbaTempHot -contains $cbaTn -and $cbaTv -lt 6500) {
+        Fail ("color_grading/{0}: temperature {1} K ESFRIA a imagem, mas a familia e quente (piso 6500 K)" -f $cbaTf.Name, $cbaTv)
+    }
+    else {
+        $cbaTdir = if ($cbaTv -gt 6500) { 'esquenta' } elseif ($cbaTv -lt 6500) { 'esfria' } else { 'neutro' }
+        Ok ("color_grading/{0,-14} temperature {1} K ({2})" -f $cbaTf.Name, $cbaTv, $cbaTdir)
+    }
+}
+
 # --- coerencia do sistema de agua -------------------------------------------
 # O vanilla NAO diferencia a surface_color entre oceano raso e fundo: ocean e
 # deep_ocean usam #1787D4, cold_ocean e deep_cold_ocean usam #2080C9, e assim

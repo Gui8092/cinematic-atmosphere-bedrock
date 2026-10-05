@@ -80,11 +80,11 @@ biomas sem atribuição explícita (inclusive biomas futuros).
 | Arquivo | Identificador | Temperatura | Contraste |
 |---|---|---:|---:|
 | `color_grading.json` | `cba:cg_overworld` | 6500 K | 1.12 |
-| `cold.json` | `cba:cg_cold` | 8200 K | 1.10 |
+| `cold.json` | `cba:cg_cold` | 5200 K | 1.10 |
 | `hot.json` | `cba:cg_hot` | 7200 K | 1.14 |
 | `swamp.json` | `cba:cg_swamp` | 6600 K | 1.12 |
 | `cave.json` | `cba:cg_cave` | 5200 K | 1.22 |
-| `nether.json` | `cba:cg_nether` | 3400 K | 1.18 |
+| `nether.json` | `cba:cg_nether` | 7200 K | 1.18 |
 | `end.json` | `cba:cg_end` | 4600 K | 1.20 |
 
 `format_version: 1.21.90` (`temperature` foi adicionado nessa versão).
