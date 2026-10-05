@@ -18,7 +18,8 @@
 #>
 [CmdletBinding()]
 param(
-    [switch]$CheckOfficial
+    [switch]$CheckOfficial,
+    [switch]$SkipArtifact
 )
 
 $ErrorActionPreference = 'Stop'
@@ -392,6 +393,33 @@ foreach ($f in Get-ChildItem (Join-Path $pack 'fogs') -Filter *.json) {
 }
 Ok 'ranges e coerencia de fog schema conferidos'
 
+# --- alcance da nevoa em blocos. 'render' e FRACAO do render distance
+# (chunks x 16). Sem esta checagem, um fog_start pequeno passa despercebido e
+# a nevoa comeca a poucos blocos — o que aconteceu com cave (15 b) e end (13 b)
+# antes da revisao, contra 236 b no vanilla.
+$legFloor = @{ default = 40; forest = 40; cold = 40; mountain = 40; hot = 40; ocean = 40; swamp = 40; cave = 40; nether = 5; end = 25 }
+$vanStart = @{ default = 236; forest = 236; cold = 236; mountain = 236; hot = 236; ocean = 236; swamp = 236; cave = 236; nether = 10; end = 236 }
+foreach ($key in ($legFloor.Keys | Sort-Object)) {
+    $f = Join-Path $pack "fogs\$key.json"
+    if (-not $parsed.ContainsKey($f)) { continue }
+    $a = $parsed[$f].'minecraft:fog_settings'.distance.air
+    if (-not $a) { continue }
+    $startB = if ($a.render_distance_type -eq 'fixed') { [double]$a.fog_start }
+              else { [double]$a.fog_start * 16 * 16 }   # 16 chunks x 16 blocos
+    $endB = if ($a.render_distance_type -eq 'fixed') { [double]$a.fog_end }
+            else { [double]$a.fog_end * 16 * 16 }
+    if ($startB -lt $legFloor[$key]) {
+        Fail "fogs/$key : nevoa de ar comeca em $([int]$startB) blocos a 16 chunks; piso de legibilidade e $($legFloor[$key])"
+    }
+    if ($startB -ge $endB) {
+        Fail "fogs/$key : fog_start ($([int]$startB) b) >= fog_end ($([int]$endB) b)"
+    }
+    $ratio = if ($vanStart[$key] -gt 0) { $startB / $vanStart[$key] } else { 1 }
+    $tag = if ($a.render_distance_type -eq 'fixed') { 'fixed' } else { 'render' }
+    Ok ("fogs/{0,-9} {1,-7} ar comeca em {2,4} b e termina em {3,4} b a 16 chunks (vanilla {4} b, {5:P0})" -f `
+        $key, $tag, [int]$startB, [int]$endB, [int]$vanStart[$key], $ratio)
+}
+
 # ============================ [F] procedencia e nao-invasao =================
 Write-Host "`n[F] procedencia e nao-invasao" -ForegroundColor Cyan
 
@@ -430,8 +458,14 @@ if ($bomBad.Count -eq 0) { Ok "todos os $bomOk scripts .ps1 estao em UTF-8 COM B
 else { Fail "sem BOM UTF-8 (o PowerShell 5.1 vai corromper acentos): $($bomBad -join ', ')" }
 
 # --- o .mcpack publicado precisa corresponder ao source
+# -SkipArtifact existe porque build.ps1 chama a validacao ANTES de empacotar.
+# Sem o switch, qualquer mudanca de versao aborta o proprio build, ja que o
+# artefato ainda estaria na versao anterior. build.ps1 reexecuta a validacao
+# completa depois de empacotar.
 $mcpack = Join-Path $root 'dist\Cinematic_Atmosphere_Bedrock.mcpack'
-if (Test-Path $mcpack) {
+if ($SkipArtifact) {
+    Warn 'bloco [F]: verificacao do artefato em dist/ pulada (-SkipArtifact)'
+} elseif (Test-Path $mcpack) {
     Add-Type -AssemblyName System.IO.Compression.FileSystem
     $zip = [System.IO.Compression.ZipFile]::OpenRead($mcpack)
     try {

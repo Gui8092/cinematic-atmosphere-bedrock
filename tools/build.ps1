@@ -26,11 +26,13 @@ $distDir = Join-Path $root 'dist'
 $outFile = Join-Path $distDir $OutputName
 
 # --- 1. validacao estatica ---------------------------------------------------
-Write-Host "`n=== 1/3  Validacao estatica ===" -ForegroundColor Cyan
+# O artefato em dist/ NAO e verificado aqui: ele esta prestes a ser
+# regenerado. A verificacao completa, incluindo o artefato, roda no passo 3.
+Write-Host "`n=== 1/4  Validacao estatica (pre-empacotamento) ===" -ForegroundColor Cyan
 if ($SkipValidate) {
     Write-Host "  (ignorada por -SkipValidate)" -ForegroundColor Yellow
 } else {
-    & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'validate.ps1')
+    & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'validate.ps1') -SkipArtifact
     if ($LASTEXITCODE -ne 0) {
         Write-Host "`nBuild abortado: validate.ps1 reportou falhas. Nada foi empacotado." -ForegroundColor Red
         exit 1
@@ -38,7 +40,7 @@ if ($SkipValidate) {
 }
 
 # --- 2. empacotamento -------------------------------------------------------
-Write-Host "`n=== 2/3  Empacotamento ===" -ForegroundColor Cyan
+Write-Host "`n=== 2/4  Empacotamento ===" -ForegroundColor Cyan
 if (-not (Test-Path $pack)) { throw "resource_pack nao encontrado em $pack" }
 New-Item -ItemType Directory -Force -Path $distDir | Out-Null
 if (Test-Path $outFile) { Remove-Item $outFile -Force }
@@ -65,12 +67,24 @@ Write-Host "Gerado : $($info.FullName)"
 Write-Host ("Tamanho: {0:N0} bytes  ({1} arquivos)" -f $info.Length, $packed)
 
 # --- 3. verificacao de seguranca do pacote -----------------------------------
-Write-Host "`n=== 3/3  Verificacao de seguranca do pacote ===" -ForegroundColor Cyan
+Write-Host "`n=== 3/4  Verificacao de seguranca do pacote ===" -ForegroundColor Cyan
 & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'verify-package.ps1') `
     -Package $outFile -ExpectedEntries $packed
 if ($LASTEXITCODE -ne 0) {
     Write-Host "`nBuild abortado: verify-package.ps1 reprovou o pacote gerado." -ForegroundColor Red
     exit 1
+}
+
+# --- 4. validacao pos-empacotamento, agora incluindo o artefato --------------
+Write-Host "`n=== 4/4  Validacao pos-empacotamento (inclui o artefato) ===" -ForegroundColor Cyan
+if ($SkipValidate) {
+    Write-Host "  (ignorada por -SkipValidate)" -ForegroundColor Yellow
+} else {
+    & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'validate.ps1')
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "`nBuild abortado: o artefato gerado nao passou na validacao final." -ForegroundColor Red
+        exit 1
+    }
 }
 
 $hash = (Get-FileHash -Algorithm SHA256 -LiteralPath $outFile).Hash

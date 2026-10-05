@@ -4,6 +4,107 @@ Todas as mudanças relevantes deste resource pack.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 Versionamento do pack segue SemVer no `manifest.json`.
 
+## [1.0.3] — 2026-10-05
+
+Revisão completa do projeto. **Um bug de alcance visual grave** e três bugs de
+ferramenta encontrados. Nenhuma decisão artística alterada.
+
+### Corrigido: alcance da névoa até 18× mais agressivo que o vanilla
+
+**Este era o achado mais grave de toda a revisão.**
+
+`render_distance_type: "render"` interpreta `fog_start` / `fog_end` como
+**fração da distância de render** (chunks × 16). Nenhum teste estático pegava
+isso, porque os números estavam dentro do intervalo do schema — apenas não
+significavam o que eu acreditava.
+
+Convertendo para blocos a 16 chunks, contra o vanilla `v1.26.50.4`:
+
+| Perfil | Antes | **Corrigido** | Vanilla | Razão |
+|---|---:|---:|---:|---|
+| `fog_cave` | **15 b** | **46 b** | 236 b | 15,3× mais cedo |
+| `fog_end` | **13 b** | **115 b** | 236 b | 18,4× mais cedo |
+| `fog_nether` | 8–67 b (render) | **8–80 b (fixed)** | 10–96 b | escalava com a distância de render |
+
+Os perfis de superfície já estavam corretos: `fog_default` a 220 b contra 236 do
+vanilla (93%), `fog_hot` a 230 (98%).
+
+O End era o pior caso: `fog_start: 0.05` significava **13 blocos** de
+visibilidade num vazio que o vanilla mantém visível a 236. Iria virar sopa roxa.
+
+`fog_nether` passou de `render` para `fixed`, como o vanilla: com `render`, a
+sensação de fechamento da Nether mudava conforme a configuração de render
+distance do jogador — não seria a mesma a 8 e a 32 chunks.
+
+### Corrigido: deadlock no `build.ps1`
+
+`validate.ps1` conferia se `dist/.mcpack` tinha a mesma versão do source — mas
+`build.ps1` rodava a validação **antes** de empacotar. Resultado: era impossível
+incrementar a versão e recompilar. A mensagem de erro dizia *"rode build.ps1"*,
+que não podia ser satisfeita.
+
+- `validate.ps1 -SkipArtifact` pula o bloco do artefato.
+- `build.ps1` passou a 4 etapas: valida (sem artefato) → empacota → verifica o
+  pacote → **revalida incluindo o artefato**.
+
+Isso é mais forte que antes: o artefato é verificado duas vezes, e a validação
+final sempre roda sobre o estado real.
+
+### Corrigido: documentação desatualizada
+
+`docs/compatibility.md` afirmava 73/75 verificações quando eram 80/82. Várias
+tabelas do `README.md` tinham linhas que falharam em substituições anteriores
+(tabela de estado dos testes estava incompleta).
+
+### Adicionado: verificação de alcance em blocos
+
+`validate.ps1` agora calcula o alcance da névoa de ar dos **10 perfis** em blocos
+e reprova abaixo do piso de legibilidade por dimensão — Overworld 40, Nether 5,
+End 25. O Nether tem piso menor porque o próprio vanilla usa 10 blocos lá.
+
+`fog-report.ps1` passou a mostrar o alcance em blocos a 8 e 16 chunks, com
+comparação direta ao vanilla.
+
+**Testado nos dois sentidos:** com `fog_cave.fog_start` de volta a `0.06`, a
+verificação reprova com *"nevoa de ar comeca em 15 blocos"*.
+
+### Revisão independente — o que foi verificado e estava limpo
+
+- **Chaves JSON duplicadas** em todos os 129 arquivos — 0 (o `ConvertFrom-Json`
+  do PowerShell ignora silenciosamente; a checagem usou um scanner manual)
+- **BOM dentro do pack** — 0 (um BOM no meio da lista de arquivos tornaria o
+  manifesto ilegível para o motor)
+- **Vírgulas finais** — 0
+- **Keyframes:** todos numéricos, dentro de `[0,1]`, sem repetição, com `0.0` e
+  `1.0` presentes e **iguais** (nenhum salto na virada do dia)
+- **Cores:** todos os hex de 6/8 dígitos, todos os arrays RGB com 3–4 valores em
+  `[0,255]` — 0 problemas
+- **Configurações mortas:** toda config declarada é referenciada por ao menos um
+  bioma — 0 mortas
+- **Case dos nomes de arquivo:** tudo em minúsculas
+- **`pack_icon.png`:** PNG válido, 128×128, 8-bit, RGBA
+- **Agrupamento por bioma:** 14 assinaturas distintas, soma 89, coincide com o
+  mapa de 16 famílias
+
+### Validação
+
+| Execução | Verificações | Falhas | Avisos |
+|---|---:|---:|---:|
+| `validate.ps1` (offline) | 90 | 0 | 0 |
+| `validate.ps1 -CheckOfficial` | 92 | 0 | 0 |
+| `test-negative.ps1` | 29 | 0 | 0 |
+
+`.mcpack`: 130 entradas, CRC íntegro, APROVADO.
+
+### Pendente
+
+**Testes visuais e de desempenho continuam NÃO executados.** O alcance da névoa
+agora é previsível em blocos, o que torna o teste visual muito mais fácil de
+interpretar — se algo parecer errado, dá para dizer "a 46 blocos deveria ver
+mais".
+
+---
+
 ## [1.0.2] — 2026-10-05
 
 Resolução das pendências que **não** dependem de execução no Minecraft.

@@ -108,7 +108,73 @@ foreach ($g in ($byProfile | Sort-Object Name)) {
     Write-Host ("{0,-16} {1,-8} {2,-24} {3}" -f $first.Perfil, $max, $first.Rampa, ($vals -join ' '))
 }
 
-Write-Host "`n=== Resumo por perfil ===" -ForegroundColor Cyan
+Write-Host "`n=== Alcance da nevoa de ar em BLOCOS ===" -ForegroundColor Cyan
+Write-Host "  type 'render' = fracao do render distance (render_distance_chunks x 16)" -ForegroundColor DarkGray
+Write-Host "  type 'fixed'  = blocos absolutos, independem do render distance" -ForegroundColor DarkGray
+Write-Host ""
+Write-Host ("{0,-14} {1,-12} {2,-16} {3,-16} {4,-16}" -f 'perfil', 'tipo', 'pack @8ch', 'pack @16ch', 'vanilla @16ch')
+Write-Host ("-" * 88)
+
+# referencias medidas do vanilla v1.26.50.4 (docs/research.md §14)
+$vanRef = @{
+    'default'  = @{ f = 'default_fog_setting.json';                          t = 'render' }
+    'forest'   = @{ f = 'jungle_fog_setting.json';                            t = 'render' }
+    'cold'     = @{ f = 'cold_taiga_fog_setting.json';                       t = 'render' }
+    'mountain' = @{ f = 'extreme_hills_plus_trees_fog_setting.json';          t = 'render' }
+    'hot'      = @{ f = 'desert_fog_setting.json';                            t = 'render' }
+    'ocean'    = @{ f = 'lukewarm_ocean_fog_setting.json';                   t = 'render' }
+    'swamp'    = @{ f = 'swampland_fog_setting.json';                        t = 'render' }
+    'cave'     = @{ f = 'lush_caves_fog_setting.json';                       t = 'render' }
+    'nether'   = @{ f = 'hell_fog_setting.json';                             t = 'fixed'  }
+    'end'      = @{ f = 'the_end_fog_setting.json';                          t = 'render' }
+}
+# valores vanilla medidos (air): start,end
+$vanVals = @{
+    'default' = @(0.92, 1.0); 'forest' = @(0.92, 1.0); 'cold' = @(0.92, 1.0)
+    'mountain'= @(0.92, 1.0); 'hot' = @(0.92, 1.0); 'ocean' = @(0.92, 1.0)
+    'swamp'   = @(0.92, 1.0); 'cave' = @(0.92, 1.0)
+    'nether'  = @(10.0, 96.0); 'end' = @(0.92, 1.0)
+}
+
+$rows2 = @{}
+foreach ($f in Get-ChildItem $fogDir -Filter *.json | Sort-Object Name) {
+    $key = $f.BaseName
+    $j = Get-Content -Raw -LiteralPath $f.FullName | ConvertFrom-Json
+    $a = $j.'minecraft:fog_settings'.distance.air
+    if (-not $a) { continue }
+    if ($a.render_distance_type -eq 'fixed') {
+        $b8 = '{0:N0}-{1:N0}' -f $a.fog_start, $a.fog_end
+        $b16 = '{0:N0}-{1:N0}' -f $a.fog_start, $a.fog_end
+    } else {
+        $b8  = '{0:N0}-{1:N0}' -f ($a.fog_start * 8 * 16),  ($a.fog_end * 8 * 16)
+        $b16 = '{0:N0}-{1:N0}' -f ($a.fog_start * 16 * 16), ($a.fog_end * 16 * 16)
+    }
+    $vr = $vanVals[$key]
+    $vanTxt = if ($vanRef[$key].t -eq 'fixed') { '{0:N0}-{1:N0}' -f $vr[0], $vr[1] }
+              else { '{0:N0}-{1:N0}' -f ($vr[0] * 16 * 16), ($vr[1] * 16 * 16) }
+    Write-Host ("{0,-14} {1,-12} {2,-16} {3,-16} {4,-16}" -f $key, $a.render_distance_type, "$b8 b", "$b16 b", "$vanTxt b")
+
+    $startB = if ($a.render_distance_type -eq 'fixed') { [double]$a.fog_start } else { [double]$a.fog_start * 16 * 16 }
+    $rows2[$key] = $startB
+}
+
+Write-Host ""
+$piso = @{ overworld = 40; nether = 5; end = 25 }
+$dimOf = @{ nether = 'nether'; end = 'end' }
+$minTxt = @()
+foreach ($k in ($rows2.Keys | Sort-Object)) {
+    $dim = if ($dimOf.ContainsKey($k)) { $dimOf[$k] } else { 'overworld' }
+    $p = $piso[$dim]
+    $mark = if ($rows2[$k] -lt $p) { 'ABAIXO DO PISO' } else { 'ok' }
+    $minTxt += ('{0}={1:N0}b/{2} {3}' -f $k, $rows2[$k], $p, $mark)
+}
+Write-Host ("Alcance inicial a 16 chunks (piso por dimensao: Overworld 40, Nether 5, End 25):") -ForegroundColor Cyan
+Write-Host ("  " + ($minTxt -join '  |  '))
+$below = @($minTxt | Where-Object { $_ -match 'ABAIXO DO PISO' })
+if ($below.Count -gt 0) { Write-Host ("  PERFILES ABAIXO DO PISO: " + ($below -join ', ')) -ForegroundColor Red }
+else { Write-Host "  todos os perfis dentro do piso" -ForegroundColor Green }
+Write-Host "  type 'fixed' nao muda com o render distance; type 'render' escala." -ForegroundColor DarkGray
+Write-Host "  O vanilla usa 'fixed' no Nether e 'render' em todos os outros." -ForegroundColor DarkGray
 foreach ($g in ($byProfile | Sort-Object Name)) {
     $first = $g.Group | Select-Object -First 1
     $rampa = $first.Rampa

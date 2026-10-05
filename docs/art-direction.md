@@ -109,6 +109,9 @@ A névoa é o que separa os planos de uma paisagem. Cada família tem um
 | `fog_ocean` | 0.78 | Funde mar e céu no horizonte |
 | `fog_default` | 0.86 | Quase transparente — planície aberta |
 | `fog_hot` | **0.90** | Quase sem névoa; só poeira quente |
+| `fog_cave` | 0.18 | Fecha o túnel; ver §Alcance da névoa em blocos |
+| `fog_nether` | 8.0 (`fixed`) | Fecha rápido e não muda com a distância de render |
+| `fog_end` | 0.45 | Vazio profundo, mas com visibilidade preservada |
 
 ### Feixes de luz
 
@@ -121,6 +124,39 @@ direção ao observador, que é exatamente o que se enxerga como um feixe.
 | `fog_default` / `fog_cold` | 0.72 | Padrão do jogo, unchanged |
 | `fog_ocean` | 0.75 | Leve |
 | `fog_cave` / `fog_nether` / `fog_end` | 0.40 / 0.35 / 0.45 | Atenuado; scattering alto aqui só daria névoa chapada |
+
+### Alcance da névoa em blocos — o ajuste mais importante desta revisão
+
+`render_distance_type: "render"` interpreta `fog_start` / `fog_end` como
+**fração da distância de render** (chunks × 16). Isso significa que
+`0.05` não é "5% de algo pequeno": a 16 chunks, são **13 blocos**.
+
+Na v1.0.2, três perfis tinham valores **até 18× mais agressivos que o vanilla**
+e nenhum teste estático os detectava, porque os números estavam "dentro do
+intervalo do schema". O vanilla começa a névoa a **236 blocos**; este pack
+começava a:
+
+| Perfil | Antes | **Agora** | Vanilla | Correção |
+|---|---:|---:|---:|---|
+| `fog_cave` | 15 b | **46 b** | 236 b | `0.06 → 0.18` no início |
+| `fog_end` | 13 b | **115 b** | 236 b | `0.05 → 0.45` no início |
+| `fog_nether` | 8–67 b | **8–80 b fixo** | 10–96 b | `render` → `fixed` |
+
+Os perfis de superfície já estavam correctos: `fog_default` começa a 220 blocos
+contra 236 do vanilla (93%), `fog_hot` a 230 (98%).
+
+**`fog_nether` passou a `fixed`**, como o vanilla. Com `render`, o alcance da
+Nether mudava conforme a configuração de render distance do jogador — a sensação
+de fechamento não seria a mesma a 8 e a 32 chunks. Com `fixed` em 8–80 blocos
+contra 10–96 do vanilla, o fechamento é determinístico.
+
+`fog_cave` a 20% do vanilla é **intencional**: caverna deve parecer fechada. Mas
+46 blocos ainda dão tempo para ver perigo e obstáculo antes da névoa.
+
+Agora `validate.ps1` calcula o alcance em blocos de todos os 10 perfis e
+reprova se algum cair abaixo do piso de legibilidade por dimensão
+(Overworld 40, Nether 5, End 25). O teste foi rodado nos dois sentidos: com
+`cave.fog_start` de volta a 0.06, a verificação reprova.
 
 ### O piso universal de baixa altitude
 
