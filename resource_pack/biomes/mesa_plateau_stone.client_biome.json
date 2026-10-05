@@ -29,6 +29,9 @@
       "minecraft:water_identifier": {
         "water_identifier": "cba:water_fresh"
       },
+      "minecraft:cubemap_identifier": {
+        "cubemap_identifier": "cba:cubemap_overworld"
+      },
       "minecraft:ambient_sounds": {
         "underwater_addition": {
           "asset": "ambient.underwater.additions",

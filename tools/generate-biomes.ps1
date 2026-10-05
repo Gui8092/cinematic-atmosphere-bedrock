@@ -1,23 +1,40 @@
 ﻿<#
     generate-biomes.ps1 — Gera os 89 arquivos resource_pack\biomes\*.client_biome.json.
 
-    Por que reescrever os arquivos vanilla em vez de so usar os JSONs globais:
-    desde 1.21.90 as configuracoes por bioma do pack base vanilla tem precedencia
+    POR QUE REESCREVER OS ARQUIVOS VANILLA
+    Desde 1.21.90 as configuracoes por bioma do pack base vanilla tem precedencia
     sobre os JSONs globais de packs customizados. Sem um *.client_biome.json por
-    bioma, lighting/global.json e atmospherics/atmospherics.json seriam ignorados.
+    bioma, lighting\global.json e atmospherics\atmospherics.json seriam ignorados.
 
-    Como nao ha documentacao sobre merge de client_biome entre resource packs,
-    este script aplica a alteracao minima: preserva todos os componentes
-    vanilla verbatim (sons, musica, cores de grama/folhagem, sky_color,
-    water_appearance) e so substitui os identificadores Vibrant Visuals.
+    COMO O MERGE FUNCIONA (nao documentado pela Mojang)
+    A documentacao nao informa se um *.client_biome.json de maior prioridade
+    SUBSTITUI ou MESCLA o do vanilla. Como nao podemos presumir, o gerador
+    aplica a alteracao minima e reproduz verbatim todos os componentes vanilla
+    que nao pertencem ao escopo visual (sons, musica, cores, precipitacao).
+    Isso e seguro sob as duas hipoteses: se houver merge, o resultado e o mesmo;
+    se houver substituicao total, nada se perde.
 
-    Uso:
-      .\generate-biomes.ps1                 # reaplica o mapa nos arquivos locais
-      .\generate-biomes.ps1 -RefreshVanilla # reimporta os componentes vanilla da tag fixada
+    PROCEDENCIA E LICENCA
+    Os valores vem de tools\vanilla-baseline.json, transcrito de
+    https://github.com/Mojang/bedrock-samples/tree/v1.26.50.4/resource_pack/biomes
+    -> (c) Mojang AB, todos os direitos reservados, sujeito ao Minecraft EULA.
+    O baseline contem SOMENTE valores factuais: identificadores do jogo (bioma,
+    evento de som, faixa de musica) e cores hexadecimais. NENHUM asset oficial
+    (textura, modelo, som, geometria, particula) e incluido ou redistribuido.
+
+    VERSIONAMENTO
+    O format_version e o MESMO do arquivo vanilla de origem, bioma a bioma.
+    Nao e rebaixado: rebaixar pode mudar a interpretacao do schema ou fazer o
+    motor rejeitar propriedades. vanilla usa 1.21.120 (87 biomas),
+    1.26.0 (sulfur_caves) e 1.26.50 (dappled_forest).
+
+    USO
+      .\generate-biomes.ps1              # offline: usa tools\vanilla-baseline.json
+      .\generate-biomes.ps1 -SyncBaseline # baixa a referencia fixada e regrava o baseline (requer internet)
 #>
 [CmdletBinding()]
 param(
-    [switch]$RefreshVanilla
+    [switch]$SyncBaseline
 )
 
 $ErrorActionPreference = 'Stop'
@@ -25,26 +42,19 @@ $ErrorActionPreference = 'Stop'
 
 $root       = Split-Path -Parent $PSScriptRoot
 $biomesDir  = Join-Path $root 'resource_pack\biomes'
+$baselinePath = Join-Path $root $CbaVanillaRef.Baseline
 $biomeIndex = Get-CbaBiomeIndex
 $expected   = 89
-
-if ($biomeIndex.Count -ne $expected) {
-    throw "Mapeamento contem $($biomeIndex.Count) biomas; esperado $expected."
-}
-New-Item -ItemType Directory -Force -Path $biomesDir | Out-Null
+$VV = $CbaVvComponents
 
 # --- Serializador JSON deterministico (2 espacos, ordem de property preservada)
 function Format-CbaJson {
     param($Value, [int]$Indent = 0)
     $pad   = ' ' * $Indent
     $padIn = ' ' * ($Indent + 2)
-
     if ($null -eq $Value) { return 'null' }
     if ($Value -is [bool]) { if ($Value) { return 'true' } else { return 'false' } }
-
-    if ($Value -is [string]) {
-        return '"' + ($Value -replace '\\', '\\\\' -replace '"', '\"') + '"'
-    }
+    if ($Value -is [string]) { return '"' + ($Value -replace '\\', '\\\\' -replace '"', '\"') + '"' }
     if ($Value -is [byte] -or $Value -is [int16] -or $Value -is [int] -or $Value -is [long] -or
         $Value -is [single] -or $Value -is [double] -or $Value -is [decimal]) {
         return [string]::Format([System.Globalization.CultureInfo]::InvariantCulture, '{0}', $Value)
@@ -61,102 +71,145 @@ function Format-CbaJson {
         $lines = foreach ($i in $items) { $padIn + (Format-CbaJson $i ($Indent + 2)) }
         return "[`n" + ($lines -join ",`n") + "`n$pad]"
     }
-
     $props = @($Value.PSObject.Properties | Where-Object { $_.MemberType -ne 'Method' })
     if ($props.Count -eq 0) { return '{}' }
     $lines = foreach ($p in $props) { $padIn + '"' + $p.Name + '": ' + (Format-CbaJson $p.Value ($Indent + 2)) }
     return "{`n" + ($lines -join ",`n") + "`n$pad}"
 }
 
-function Get-VanillaBiome {
-    param([string]$Biome)
-    $file = "$Biome.client_biome.json"
-    $url  = "https://raw.githubusercontent.com/$($CbaVanillaRef.Repo)/$($CbaVanillaRef.Tag)/$($CbaVanillaRef.BiomesDir)/$file"
-    try {
-        return Invoke-RestMethod -Uri $url -UseBasicParsing -TimeoutSec 30
-    } catch {
-        throw "Falha ao baixar $url : $($_.Exception.Message)"
-    }
-}
-
 function Set-Prop {
     param($Object, [string]$Name, $Value)
-    if ($Object.PSObject.Properties.Name -contains $Name) {
-        $Object.$Name = $Value
-    } else {
-        $Object | Add-Member -NotePropertyName $Name -NotePropertyValue $Value
-    }
+    if ($Object.PSObject.Properties.Name -contains $Name) { $Object.$Name = $Value }
+    else { $Object | Add-Member -NotePropertyName $Name -NotePropertyValue $Value }
 }
 
-# --- Ordem canonica das chaves de um client_biome ---------------------------
-$keyOrder = @(
-    'format_version', 'minecraft:client_biome'
-)
+# ---------------------------------------------------------------------------
+# -SyncBaseline: atualiza o baseline a partir da referencia fixada (requer rede)
+# ---------------------------------------------------------------------------
+if ($SyncBaseline) {
+    Write-Host "Sincronizando baseline com $($CbaVanillaRef.Repo)@$($CbaVanillaRef.Tag) ..." -ForegroundColor Cyan
+    $api = "https://api.github.com/repos/$($CbaVanillaRef.Repo)/contents/$($CbaVanillaRef.BiomesDir)?ref=$($CbaVanillaRef.Tag)"
+    $listing = @(Invoke-RestMethod -Uri $api -UseBasicParsing -Headers @{ 'User-Agent' = 'cinematic-atmosphere-bedrock' } -TimeoutSec 30)
+    $names = @($listing | Where-Object { $_.name -like '*.client_biome.json' } | ForEach-Object { $_.name })
+    if ($names.Count -ne $expected) { throw "Referencia oficial tem $($names.Count) biomas; esperado $expected." }
+
+    $biomesOut = [ordered]@{}
+    foreach ($n in ($names | Sort-Object)) {
+        $biome = $n -replace '\.client_biome\.json$', ''
+        $url = "https://raw.githubusercontent.com/$($CbaVanillaRef.Repo)/$($CbaVanillaRef.Tag)/$($CbaVanillaRef.BiomesDir)/$n"
+        $src = Invoke-RestMethod -Uri $url -UseBasicParsing -TimeoutSec 30
+        $cb = $src.'minecraft:client_biome'
+        if (-not $cb) { throw "$biome : 'minecraft:client_biome' ausente na referencia." }
+        $expectedId = "minecraft:$biome"
+        if ($cb.description.identifier -ne $expectedId) {
+            throw "$biome : identificador da referencia e '$($cb.description.identifier)', esperado '$expectedId'."
+        }
+        $preserve = [ordered]@{}
+        foreach ($p in $cb.components.PSObject.Properties) {
+            if ($VV -contains $p.Name) { continue }
+            $preserve[$p.Name] = $p.Value
+        }
+        $biomesOut[$biome] = [ordered]@{ format_version = $src.format_version; preserve = $preserve }
+    }
+
+    $doc = [ordered]@{
+        source = [ordered]@{
+            repository = $CbaVanillaRef.Repo
+            tag        = $CbaVanillaRef.Tag
+            path       = $CbaVanillaRef.BiomesDir
+            retrieved  = (Get-Date -Format 'yyyy-MM-dd')
+            license    = '(c) Mojang AB. All rights reserved - subject to the Minecraft EULA'
+            note       = 'Baseline transcribed from the official reference. Contains ONLY factual values: game identifiers (biome, sound event, music track) and hex colors. No texture, model, sound, geometry or other Minecraft asset is included.'
+        }
+        biome_count = $biomesOut.Count
+        biomes      = $biomesOut
+    }
+    [System.IO.File]::WriteAllText($baselinePath, (Format-CbaJson $doc 0) + "`n", (New-Object System.Text.UTF8Encoding($false)))
+    Write-Host "Baseline regravado: $($biomesOut.Count) biomas." -ForegroundColor Green
+}
+
+# ---------------------------------------------------------------------------
+# Gera os arquivos de bioma a partir do baseline (offline)
+# ---------------------------------------------------------------------------
+$baseline = Get-CbaBaseline -Root $root
+
+$baselineBiomes = @($baseline.biomes.PSObject.Properties.Name)
+$mapBiomes = @($biomeIndex.Keys)
+
+$missing = @($mapBiomes | Where-Object { $baselineBiomes -notcontains $_ })
+$extra   = @($baselineBiomes | Where-Object { $mapBiomes -notcontains $_ })
+if ($missing.Count -gt 0) { throw "Biomas no mapa ausentes no baseline: $($missing -join ', ')" }
+if ($extra.Count -gt 0)   { throw "Biomas no baseline ausentes no mapa: $($extra -join ', ')" }
+if ($mapBiomes.Count -ne $expected) { throw "Mapeamento contem $($mapBiomes.Count) biomas; esperado $expected." }
+
+New-Item -ItemType Directory -Force -Path $biomesDir | Out-Null
+
+# Componentes preservados declarados no baseline mas nao cobertos pela lista de
+# preservacao -> erro de configuracao do proprio mapa, detectado aqui.
+$allPreserve = @{}
+foreach ($b in $baselineBiomes) {
+    foreach ($p in $baseline.biomes.$b.preserve.PSObject.Properties) { $allPreserve[$p.Name] = $true }
+}
+foreach ($c in $allPreserve.Keys) {
+    if ($CbaPreservedComponents -notcontains $c) {
+        throw "Componente preservado '$c' esta no baseline mas nao em `$CbaPreservedComponents."
+    }
+}
 
 $written = 0
 foreach ($biome in $biomeIndex.Keys) {
     $family = $CbaFamilies[$biomeIndex[$biome]]
-    $path   = Join-Path $biomesDir "$biome.client_biome.json"
+    $entry  = $baseline.biomes.$biome
 
-    if ($RefreshVanilla -or -not (Test-Path $path)) {
-        $src = Get-VanillaBiome -Biome $biome
-    } else {
-        $src = Get-Content -Raw -LiteralPath $path | ConvertFrom-Json
-    }
+    # --- format_version: o MESMO do vanilla, nunca rebaixado
+    $fv = $entry.format_version
+    if ([string]::IsNullOrWhiteSpace($fv)) { throw "$biome : baseline sem format_version." }
 
-    $cb = $src.'minecraft:client_biome'
-    if (-not $cb) { throw "$biome : propriedade 'minecraft:client_biome' ausente." }
+    # --- componentes nao-visuais, verbatim do baseline
+    $comps = [ordered]@{}
+    foreach ($p in $entry.preserve.PSObject.Properties) { $comps[$p.Name] = $p.Value }
 
-    $cb.description.identifier = "minecraft:$biome"
-    $comps = $cb.components
-
-    # --- identificadores Vibrant Visuals (nomes reservados) ---
-    Set-Prop $comps 'minecraft:atmosphere_identifier'    ([pscustomobject]@{ atmosphere_identifier    = $family.Atmospherics })
-    Set-Prop $comps 'minecraft:color_grading_identifier' ([pscustomobject]@{ color_grading_identifier = $family.ColorGrading })
-    Set-Prop $comps 'minecraft:lighting_identifier'      ([pscustomobject]@{ lighting_identifier      = $family.Lighting })
-    Set-Prop $comps 'minecraft:water_identifier'         ([pscustomobject]@{ water_identifier         = $family.Water })
-
+    # --- identificadores Vibrant Visuals
+    $comps['minecraft:fog_appearance'] = [ordered]@{ fog_identifier = $family.Fog }
+    $comps['minecraft:atmosphere_identifier']    = [ordered]@{ atmosphere_identifier    = $family.Atmospherics }
+    $comps['minecraft:color_grading_identifier'] = [ordered]@{ color_grading_identifier = $family.ColorGrading }
+    $comps['minecraft:lighting_identifier']      = [ordered]@{ lighting_identifier      = $family.Lighting }
+    $comps['minecraft:water_identifier']         = [ordered]@{ water_identifier         = $family.Water }
     if ($family.Cubemap) {
-        Set-Prop $comps 'minecraft:cubemap_identifier' ([pscustomobject]@{ cubemap_identifier = $family.Cubemap })
-    } else {
-        $comps.PSObject.Properties.Remove('minecraft:cubemap_identifier')
+        $comps['minecraft:cubemap_identifier'] = [ordered]@{ cubemap_identifier = $family.Cubemap }
     }
 
-    # fog_appearance ja existe no vanilla: preserva o resto e troca so o identificador
-    if (-not $comps.'minecraft:fog_appearance') {
-        $comps | Add-Member -NotePropertyName 'minecraft:fog_appearance' -NotePropertyValue ([pscustomobject]@{ fog_identifier = $family.Fog })
-    } else {
-        $comps.'minecraft:fog_appearance'.fog_identifier = $family.Fog
-    }
-
-    # --- reordena: format_version, description, components (ordem estavel) ---
-    $compsOrdered = [ordered]@{}
+    # --- ordem estavel de leitura
+    $ordered = [ordered]@{}
     foreach ($name in @('minecraft:sky_color', 'minecraft:fog_appearance', 'minecraft:water_appearance',
                         'minecraft:grass_appearance', 'minecraft:foliage_appearance', 'minecraft:dry_foliage_color',
                         'minecraft:precipitation', 'minecraft:atmosphere_identifier', 'minecraft:color_grading_identifier',
                         'minecraft:lighting_identifier', 'minecraft:water_identifier', 'minecraft:cubemap_identifier',
                         'minecraft:ambient_sounds', 'minecraft:biome_music')) {
-        if ($comps.PSObject.Properties.Name -contains $name) { $compsOrdered[$name] = $comps.$name }
+        if ($comps.Contains($name)) { $ordered[$name] = $comps[$name] }
     }
-    # qualquer componente vanilla restante e preservado no fim
-    foreach ($p in $comps.PSObject.Properties) {
-        if (-not $compsOrdered.Contains($p.Name)) { $compsOrdered[$p.Name] = $p.Value }
+    foreach ($name in $comps.Keys) {
+        if (-not $ordered.Contains($name)) { $ordered[$name] = $comps[$name] }
     }
 
     $doc = [ordered]@{
-        format_version        = '1.21.120'
+        format_version           = $fv
         'minecraft:client_biome' = [ordered]@{
             description = [ordered]@{ identifier = "minecraft:$biome" }
-            components  = $compsOrdered
+            components  = $ordered
         }
     }
 
-    $json = Format-CbaJson $doc 0
-    [System.IO.File]::WriteAllText($path, $json + "`n", (New-Object System.Text.UTF8Encoding($false)))
+    $path = Join-Path $biomesDir "$biome.client_biome.json"
+    [System.IO.File]::WriteAllText($path, (Format-CbaJson $doc 0) + "`n", (New-Object System.Text.UTF8Encoding($false)))
     $written++
 }
 
-Write-Host "generate-biomes: $written arquivos escritos em resource_pack\biomes (esperado $expected)."
-if ($RefreshVanilla) {
-    Write-Host "Componentes vanilla reimportados de $($CbaVanillaRef.Repo)@$($CbaVanillaRef.Tag)."
+Write-Host "generate-biomes: $written arquivos escritos em resource_pack\biomes (esperado $expected)." -ForegroundColor Green
+$fvSet = @($baselineBiomes | ForEach-Object { $baseline.biomes.$_.format_version } | Sort-Object -Unique)
+Write-Host "format_version preservados da referencia: $($fvSet -join ', ')"
+if ($SyncBaseline) {
+    Write-Host "Baseline atualizado de $($CbaVanillaRef.Repo)@$($CbaVanillaRef.Tag)." -ForegroundColor DarkGray
+} else {
+    Write-Host "Modo offline: baseline local. Use -SyncBaseline para atualizar a referencia." -ForegroundColor DarkGray
 }

@@ -1,0 +1,1668 @@
+{
+  "source": {
+    "repository": "Mojang/bedrock-samples",
+    "tag": "v1.26.50.4",
+    "path": "resource_pack/biomes",
+    "retrieved": "2026-10-05",
+    "license": "(c) Mojang AB. All rights reserved - subject to the Minecraft EULA",
+    "note": "Baseline transcribed from the official reference. Contains ONLY factual values: game identifiers (biome, sound event, music track) and hex colors. No texture, model, sound, geometry or other Minecraft asset is included."
+  },
+  "biome_count": 89,
+  "biomes": {
+    "bamboo_jungle": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#14A2C5"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "bamboo_jungle"
+        }
+      }
+    },
+    "bamboo_jungle_hills": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#1B9ED8"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "bamboo_jungle_hills"
+        }
+      }
+    },
+    "basalt_deltas": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#3f76e4"
+        },
+        "minecraft:ambient_sounds": {
+          "addition": {
+            "asset": "ambient.basalt_deltas.additions",
+            "chance": 0.0111
+          },
+          "loop": "ambient.basalt_deltas.loop",
+          "mood": "ambient.basalt_deltas.mood",
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:precipitation": {
+          "white_ash": 2.0
+        },
+        "minecraft:biome_music": {
+          "music_definition": "basalt_deltas"
+        }
+      }
+    },
+    "beach": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#157cab"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "birch_forest": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#0677ce"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "birch_forest"
+        }
+      }
+    },
+    "birch_forest_hills": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#0a74c4"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "birch_forest_hills"
+        }
+      }
+    },
+    "birch_forest_hills_mutated": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#44AFF5"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "birch_forest_mutated": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#44AFF5"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "birch_forest_mutated"
+        }
+      }
+    },
+    "cherry_grove": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#5db7ef"
+        },
+        "minecraft:foliage_appearance": {
+          "color": "#b6db61"
+        },
+        "minecraft:grass_appearance": {
+          "color": "#b6db61"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "cherry_grove"
+        }
+      }
+    },
+    "cold_beach": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#1463a5"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "cold_ocean": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#2080C9"
+        },
+        "minecraft:biome_music": {
+          "underwater_music": true
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "cold_taiga": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#205e83"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "cold_taiga_hills": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#245b78"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "cold_taiga_mutated": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#205e83"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "crimson_forest": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#905957"
+        },
+        "minecraft:ambient_sounds": {
+          "addition": {
+            "asset": "ambient.crimson_forest.additions",
+            "chance": 0.0111
+          },
+          "loop": "ambient.crimson_forest.loop",
+          "mood": "ambient.crimson_forest.mood",
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:precipitation": {
+          "red_spores": 0.25
+        },
+        "minecraft:biome_music": {
+          "music_definition": "crimson_forest"
+        }
+      }
+    },
+    "dappled_forest": {
+      "format_version": "1.26.50",
+      "preserve": {
+        "minecraft:grass_appearance": {
+          "color": "#df6827"
+        },
+        "minecraft:dry_foliage_color": {
+          "color": "#8c3a04"
+        },
+        "minecraft:foliage_appearance": {
+          "color": "#e68e30"
+        },
+        "minecraft:sky_color": {
+          "sky_color": "#7ca3ff"
+        },
+        "minecraft:water_appearance": {
+          "surface_color": "#375154"
+        }
+      }
+    },
+    "deep_cold_ocean": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#2080C9"
+        },
+        "minecraft:biome_music": {
+          "underwater_music": true
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "deep_dark": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#44AFF5"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "deep_dark"
+        }
+      }
+    },
+    "deep_frozen_ocean": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#2570B5"
+        },
+        "minecraft:biome_music": {
+          "underwater_music": true
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "deep_lukewarm_ocean": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#0D96DB"
+        },
+        "minecraft:biome_music": {
+          "underwater_music": true
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "deep_ocean": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#1787D4"
+        },
+        "minecraft:biome_music": {
+          "underwater_music": true
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "deep_warm_ocean": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#02B0E5"
+        },
+        "minecraft:biome_music": {
+          "underwater_music": true
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "desert": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#32A598"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "desert"
+        }
+      }
+    },
+    "desert_hills": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#1a7aa1"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "desert_hills"
+        }
+      }
+    },
+    "desert_mutated": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#44AFF5"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "desert_mutated"
+        }
+      }
+    },
+    "dripstone_caves": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#44AFF5"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "dripstone_caves"
+        }
+      }
+    },
+    "extreme_hills": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#007BF7"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "extreme_hills_edge": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#045cd5"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "extreme_hills_mutated": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#0E63AB"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "extreme_hills_plus_trees": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#0E63AB"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "extreme_hills_plus_trees_mutated": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#0E63AB"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "flower_forest": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#20A3CC"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "flower_forest"
+        }
+      }
+    },
+    "forest": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#1E97F2"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "forest"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "forest_hills": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#056bd1"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "frozen_ocean": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#2570B5"
+        },
+        "minecraft:biome_music": {
+          "underwater_music": true
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "frozen_peaks": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#44AFF5"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "frozen_peaks"
+        }
+      }
+    },
+    "frozen_river": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#185390"
+        },
+        "minecraft:biome_music": {
+          "underwater_music": true
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "grove": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#44AFF5"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "grove"
+        }
+      }
+    },
+    "hell": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#905957"
+        },
+        "minecraft:ambient_sounds": {
+          "addition": {
+            "asset": "ambient.nether_wastes.additions",
+            "chance": 0.0111
+          },
+          "loop": "ambient.nether_wastes.loop",
+          "mood": "ambient.nether_wastes.mood",
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "hell"
+        }
+      }
+    },
+    "ice_mountains": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#1156a7"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "ice_plains": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#14559b"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "ice_plains_spikes": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#14559b"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "jagged_peaks": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#44AFF5"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "jagged_peaks"
+        }
+      }
+    },
+    "jungle": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#14A2C5"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "jungle"
+        }
+      }
+    },
+    "jungle_edge": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#0D8AE3"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "jungle_edge"
+        }
+      }
+    },
+    "jungle_edge_mutated": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#44AFF5"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "jungle_hills": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#1B9ED8"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "jungle_hills"
+        }
+      }
+    },
+    "jungle_mutated": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#1B9ED8"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "jungle_mutated"
+        }
+      }
+    },
+    "legacy_frozen_ocean": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#44AFF5"
+        },
+        "minecraft:biome_music": {
+          "underwater_music": true
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "lukewarm_ocean": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#0D96DB"
+        },
+        "minecraft:biome_music": {
+          "underwater_music": true
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "lush_caves": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#44AFF5"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "lush_caves"
+        }
+      }
+    },
+    "mangrove_swamp": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#3a7a6a"
+        },
+        "minecraft:foliage_appearance": {
+          "color": {
+            "color_map": "mangrove_swamp_foliage"
+          }
+        },
+        "minecraft:grass_appearance": {
+          "color": {
+            "color_map": "swamp_grass"
+          }
+        },
+        "minecraft:dry_foliage_color": {
+          "color": "#7B5334"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "mangrove_swamp"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "meadow": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#44AFF5"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "meadow"
+        }
+      }
+    },
+    "mega_taiga": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#2d6d77"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "mega_taiga"
+        }
+      }
+    },
+    "mega_taiga_hills": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#286378"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "mesa": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#4E7F81"
+        },
+        "minecraft:foliage_appearance": {
+          "color": "#aea42a"
+        },
+        "minecraft:grass_appearance": {
+          "color": "#90814d"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "mesa"
+        }
+      }
+    },
+    "mesa_bryce": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#497F99"
+        },
+        "minecraft:foliage_appearance": {
+          "color": "#aea42a"
+        },
+        "minecraft:grass_appearance": {
+          "color": "#90814d"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "mesa_plateau": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#55809E"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "mesa_plateau"
+        }
+      }
+    },
+    "mesa_plateau_mutated": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#44AFF5"
+        },
+        "minecraft:foliage_appearance": {
+          "color": "#aea42a"
+        },
+        "minecraft:grass_appearance": {
+          "color": "#90814d"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "mesa_plateau_mutated"
+        }
+      }
+    },
+    "mesa_plateau_stone": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#55809E"
+        },
+        "minecraft:foliage_appearance": {
+          "color": "#aea42a"
+        },
+        "minecraft:grass_appearance": {
+          "color": "#90814d"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "mesa_plateau_stone_mutated": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#44AFF5"
+        },
+        "minecraft:foliage_appearance": {
+          "color": "#aea42a"
+        },
+        "minecraft:grass_appearance": {
+          "color": "#90814d"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "mushroom_island": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#8a8997"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "mushroom_island_shore": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#818193"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "ocean": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#1787D4"
+        },
+        "minecraft:biome_music": {
+          "underwater_music": true
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "pale_garden": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:sky_color": {
+          "sky_color": "#b9b9b9"
+        },
+        "minecraft:water_appearance": {
+          "surface_color": "#76889D"
+        },
+        "minecraft:biome_music": {
+          "volume_multiplier": 0
+        },
+        "minecraft:foliage_appearance": {
+          "color": "#878d76"
+        },
+        "minecraft:grass_appearance": {
+          "color": "#778272"
+        },
+        "minecraft:dry_foliage_color": {
+          "color": "#A0A69C"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "plains": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#44AFF5"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "redwood_taiga_hills_mutated": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#44AFF5"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "redwood_taiga_hills_mutated"
+        }
+      }
+    },
+    "redwood_taiga_mutated": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#44AFF5"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "redwood_taiga_mutated"
+        }
+      }
+    },
+    "river": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#0084FF"
+        },
+        "minecraft:biome_music": {
+          "underwater_music": true
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "roofed_forest": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#3B6CD1"
+        },
+        "minecraft:dry_foliage_color": {
+          "color": "#7B5334"
+        },
+        "minecraft:grass_appearance": {
+          "grass_is_shaded": true
+        },
+        "minecraft:biome_music": {
+          "music_definition": "roofed_forest"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "roofed_forest_mutated": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#44AFF5"
+        },
+        "minecraft:dry_foliage_color": {
+          "color": "#7B5334"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "roofed_forest_mutated"
+        }
+      }
+    },
+    "savanna": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#2C8B9C"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "savanna_mutated": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#2590A8"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "savanna_plateau": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#2590A8"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "savanna_plateau_mutated": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#44AFF5"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "snowy_slopes": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#44AFF5"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "snowy_slopes"
+        }
+      }
+    },
+    "soulsand_valley": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#905957"
+        },
+        "minecraft:ambient_sounds": {
+          "addition": {
+            "asset": "ambient.soulsand_valley.additions",
+            "chance": 0.0111
+          },
+          "loop": "ambient.soulsand_valley.loop",
+          "mood": "ambient.soulsand_valley.mood",
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:precipitation": {
+          "ash": 0.05
+        },
+        "minecraft:biome_music": {
+          "music_definition": "soulsand_valley"
+        }
+      }
+    },
+    "stone_beach": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#0d67bb"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "stony_peaks": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#44AFF5"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "stony_peaks"
+        }
+      }
+    },
+    "sulfur_caves": {
+      "format_version": "1.26.0",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#34BF89"
+        },
+        "minecraft:grass_appearance": {
+          "color": "#ABA64F"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "sulfur_caves"
+        }
+      }
+    },
+    "sunflower_plains": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#44AFF5"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "swampland": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#617b64",
+          "surface_opacity": 0.65
+        },
+        "minecraft:foliage_appearance": {
+          "color": {
+            "color_map": "swamp_foliage"
+          }
+        },
+        "minecraft:grass_appearance": {
+          "color": {
+            "color_map": "swamp_grass"
+          }
+        },
+        "minecraft:dry_foliage_color": {
+          "color": "#7B5334"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "swampland"
+        }
+      }
+    },
+    "swampland_mutated": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#617b64",
+          "surface_opacity": 0.65
+        },
+        "minecraft:foliage_appearance": {
+          "color": {
+            "color_map": "swamp_foliage"
+          }
+        },
+        "minecraft:grass_appearance": {
+          "color": {
+            "color_map": "swamp_grass"
+          }
+        },
+        "minecraft:dry_foliage_color": {
+          "color": "#7B5334"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "swampland_mutated"
+        }
+      }
+    },
+    "taiga": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#287082"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "taiga_hills": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#236583"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "taiga_mutated": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#1E6B82"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "the_end": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:sky_color": {
+          "sky_color": "#000000"
+        },
+        "minecraft:water_appearance": {
+          "surface_color": "#62529e"
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:biome_music": {
+          "music_definition": "end"
+        }
+      }
+    },
+    "warm_ocean": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#02B0E5",
+          "surface_opacity": 0.55
+        },
+        "minecraft:biome_music": {
+          "underwater_music": true
+        },
+        "minecraft:ambient_sounds": {
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        }
+      }
+    },
+    "warped_forest": {
+      "format_version": "1.21.120",
+      "preserve": {
+        "minecraft:water_appearance": {
+          "surface_color": "#905957"
+        },
+        "minecraft:ambient_sounds": {
+          "addition": {
+            "asset": "ambient.warped_forest.additions",
+            "chance": 0.0111
+          },
+          "loop": "ambient.warped_forest.loop",
+          "mood": "ambient.warped_forest.mood",
+          "underwater_addition": {
+            "asset": "ambient.underwater.additions",
+            "chance": 0.01
+          },
+          "underwater_loop": "ambient.underwater.loop"
+        },
+        "minecraft:precipitation": {
+          "blue_spores": 0.25
+        },
+        "minecraft:biome_music": {
+          "music_definition": ""
+        }
+      }
+    }
+  }
+}

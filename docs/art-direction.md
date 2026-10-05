@@ -124,20 +124,48 @@ direção ao observador, que é exatamente o que se enxerga como um feixe.
 
 ### O piso universal de baixa altitude
 
+> ⚠️ **Escolha original, não um padrão do vanilla.** Nos 80 perfis de fog
+> volumétrico do vanilla `v1.26.50.4`, `zero_density_height` e
+> `max_density_height` são **sempre iguais (320.0)** e `uniform` nunca aparece.
+> O vanilla **não usa rampa vertical em lugar nenhum**. O que segue é um desenho
+> nosso, e **ainda não foi verificado dentro do jogo**.
+
 `zero_density_height` alto + `max_density_height` baixo cria um perfil em que a
-densidade é **exatamente zero** acima de certo Y. Exemplo:
+densidade é **exatamente zero** acima de certo Y:
 
 ```json
 "air": { "max_density": 0.014, "zero_density_height": 128.0, "max_density_height": 48.0 }
 ```
 
-Acima de Y=128: sem névoa, sem custo, paisagem totalmente limpa. Abaixo de
-Y=48: densidade máxima. **Todo túnel em qualquer bioma ganha bruma**, sem que o
-jogador de superfície perceba nada.
+Acima de Y=128: sem névoa, sem custo, paisagem totalmente limpa. Abaixo de Y=48:
+densidade máxima. Nas montanhas o teto sobe para **190** — picos e cumes ficam
+limpos. No pântano desce para **96** com `max_density_height` 32 — a única
+família de superfície com uma camada de bruma baixa de verdade.
 
-Nas montanhas o teto sobe para **190** — picos e cumes ficam limpos. Nas
-cavernas, Nether e End os dois valores são iguais (320), o padrão do vanilla:
-densidade uniforme, porque esses biomas só existem no subsolo / não têm céu.
+**Nas cavernas, no Nether e no End os dois valores são iguais (320):** a densidade
+é **uniforme em toda a altura abaixo de Y=320**, e não uma camada no chão. É o
+padrão do vanilla (`lush_caves`, `sulfur_caves`, `pale_garden`, `the_end`).
+Uma caverna a Y=10 tem a **mesma** densidade que uma a Y=200.
+
+### Comparação de intensidade com o vanilla
+
+Nossas densidades são deliberadamente mais baixas que as do vanilla:
+
+| Perfil | `max_density` | Referência vanilla | Razão |
+|---|---:|---|---|
+| `fog_default` | 0.014 | 0.05 (`humid`) | 28% do vanilla |
+| `fog_cold` | 0.020 | 0.05 (`cold_taiga`) | 40% |
+| `fog_forest` | 0.026 | 0.05 (`jungle`) | 52% |
+| `fog_mountain` | 0.022 | 0.05 (`taiga`) | 44% |
+| `fog_hot` | 0.010 | 0.0 (`desert`) | mais contido que o vanilla |
+| `fog_swamp` | 0.034 | 0.05 (`swampland`) | 68% |
+| `fog_cave` | 0.055 | 0.05 (`lush_caves`) | 1.1× o vanilla |
+| `fog_nether` | 0.048 | `hell` vanilla **não tem** fog volumétrico | original nosso |
+| `fog_end` | 0.040 | 0.25 (`the_end`) | **16%** — o caso mais distante |
+
+**Vales baixos:** com `fog_default`, um vale a Y=40 atinge a densidade máxima de
+0.014 — cerca de um terço da névoa de um bioma úmido do vanilla, e só abaixo de
+Y=48. Não é excessivo, mas **não foi verificado dentro do jogo** (teste C7).
 
 ---
 
@@ -153,10 +181,14 @@ suficiente para dar "ar" a qualquer túnel.
 
 **B. Densidade alta nos biomas de caverna.**
 `cba:fog_cave` usa `max_density: 0.055` — alinhado aos 0.05 / 0.07 que a própria
-Mojang usa em `lush_caves` e `sulfur_caves`. Pode ser bem mais denso que a
+Mojang usa em `lush_caves` e `sulfur_caves`. Pode ser mais denso que a
 superfície **sem custo**, porque `dripstone_caves`, `lush_caves`, `deep_dark` e
 `sulfur_caves` só existem no subsolo. Também recebe `distance.air` curto
 (`0.06 → 0.34`) para túneis longos desvanecerem.
+
+Como os dois valores de altura são iguais (320), a densidade é **uniforme na
+altura**, não uma camada no chão: uma caverna a Y=10 e outra a Y=200 têm a mesma
+bruma. A variação vertical só existe nos **perfis de superfície** (A).
 
 **C. `ambient` é a identidade real da caverna — e é de graça.**
 Os termos de sol e céu não chegam ao subsolo. Portanto **o `ambient` é o único
@@ -169,12 +201,18 @@ fisicamente correto e é o lever de maior valor do projeto para cavernas.
 
 - Um túnel sob planícies **não** fica tão denso quanto uma dripstone cave. É o
   limite do mecanismo. Testado como C5 em `docs/compatibility.md`.
-- A absorption é só luminância → o verde de `sulfur_caves` vem do `fog_color` e
-  do color grading, não do `absorption`.
+- A **absorção é só luminância** → o verde de `sulfur_caves` vem do `fog_color`
+  e do color grading, não do `absorption`.
 - Fog é a **média dos biomas vizinhos**: numa fronteira caverna/superfície a
   densidade interpola — o que é desejável.
 - Y é absoluto e o teto varia por dimensão (Nether 128, End 256): cada perfil
   define os seus próprios valores.
+- **Dentro de uma caverna não há gradiente vertical.** A densidade é uniforme
+  abaixo de Y=320. Se o objetivo fosse bruma concentrada no chão, seria preciso
+  `max_density_height` **maior** que `zero_density_height` — o oposto do que
+  este pack faz.
+- A rampa vertical dos perfis de superfície é um desenho **original e não
+  verificado em jogo**; o vanilla não a usa.
 
 ---
 
@@ -223,8 +261,18 @@ exatos do vanilla.
   lavado).
 - `cg_end` a 4600 K com sombras violetas.
 
-**O `cubemap_identifier` não é atribuído ao Nether nem ao End** — a
-customização de cubemap só vale no Overworld. `validate.ps1` verifica isso.
+**Cobertura de cubemap.** A customização de cubemap só é válida no **Overworld**
+(o End usa o cubemap embutido, e a documentação não define cubemap para o
+Nether). A regra adotada é explícita e verificada pelo validador:
+
+| Dimensão | `cubemap_identifier` | Quantidade |
+|---|---|---:|
+| Overworld (superfície e cavernas) | `cba:cubemap_overworld` | 83 de 83 |
+| Nether | nunca | 5 de 5 |
+| End | nunca | 1 de 1 |
+
+Todos os 83 biomas do Overworld recebem o identificador — inclusive deserto,
+savana e as cavernas, que antes da auditoria estavam sem ele.
 
 ---
 

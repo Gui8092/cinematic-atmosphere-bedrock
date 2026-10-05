@@ -1,0 +1,101 @@
+# NOTICE
+
+## 1. Terceiros
+
+Este projeto nao contem nenhum asset oficial do Minecraft: nenhuma textura,
+modelo, geometria, particula, animacao, interface ou som. Todos os recursos
+visuais e auditivos do jogo permanecem intocados.
+
+## 2. Referencia oficial consultada
+
+Durante o desenvolvimento e na geracao de
+`resource_pack/biomes/*.client_biome.json`, foi consultado o pack de recursos
+oficial do Minecraft: Bedrock Edition:
+
+- **Repositorio:** `Mojang/bedrock-samples`
+- **Tag:** `v1.26.50.4` (release estavel, 2026-09-15)
+- **Caminho:** `resource_pack/biomes/` (89 arquivos `*.client_biome.json`)
+- **Licenca declarada pela Mojang:**
+
+  > (c) Mojang AB. All rights reserved.
+  > By downloading the files in this repository, you agree to the
+  > Minecraft End User License Agreement and that these files are subject to
+  > its terms.
+
+- **URL:** https://github.com/Mojang/bedrock-samples/tree/v1.26.50.4/resource_pack/biomes
+- **EULA:** https://www.minecraft.net/en-us/eula
+
+## 3. Classificacao do conteudo deste repositorio
+
+| # | Categoria | Onde | Licenca |
+|---|---|---|---|
+| 1 | **Codigo e ferramentas originais** | `tools/*.ps1` | MIT |
+| 2 | **Configuracoes escritas originalmente para este pack** | `resource_pack/{lighting,atmospherics,color_grading,water,fogs,cubemaps}/`, `resource_pack/manifest.json` | MIT |
+| 3 | **Recursos originais do projeto** | `resource_pack/pack_icon.png` (gerado por script) | MIT |
+| 4 | **Valores factuais transcritos da referencia oficial** | `resource_pack/biomes/*.client_biome.json` e `tools/vanilla-baseline.json` | Ver §4 |
+| 5 | **Material que nao pode ser redistribuido** | **Nenhum** | — |
+
+## 4. Categoria 4 em detalhe — o que foi transcrito e por que
+
+### 4.1 O que contem
+
+Apenas **valores factuais**, nunca arquivos copiados:
+
+| Tipo | Exemplo | Natureza |
+|---|---|---|
+| Identificador de bioma | `minecraft:plains` | Nome |
+| Identificador de evento de som | `ambient.underwater.additions` | Nome |
+| Identificador de faixa de musica | `end`, `sulfur_caves` | Nome |
+| Cor hexadecimal | `#62529e`, `#df6827` | Valor numerico |
+
+Nenhum texto criativo, nenhuma expressao autoral, nenhuma estrutura de codigo.
+
+### 4.2 Por que esses valores estao presentes
+
+Desde a versao **1.21.90**, as configuracoes por bioma do pack base do jogo tem
+**precedencia** sobre os arquivos globais de packs customizados. Sem um
+`*.client_biome.json` por bioma, `lighting/global.json` e
+`atmospherics/atmospherics.json` seriam silenciosamente ignorados.
+
+Ao escrever um `*.client_biome.json` com o mesmo caminho do arquivo do jogo, o
+componente pode ser substituido. A documentacao da Mojang **nao informa** se a
+substituicao e total ou por componente. Para ser seguro nas duas hipoteses, o
+gerador reproduz verbatim os componentes que **nao pertencem ao escopo visual**:
+
+- `minecraft:ambient_sounds` — 88 de 89 biomas
+- `minecraft:biome_music` — 56 de 89 biomas
+- `minecraft:water_appearance` — 89 de 89 biomas
+- `minecraft:grass_appearance` — 13 de 89 biomas
+- `minecraft:foliage_appearance` — 11 de 89 biomas
+- `minecraft:dry_foliage_color` — 7 de 89 biomas
+- `minecraft:sky_color` — 3 de 89 biomas
+- `minecraft:precipitation` — 4 de 89 biomas
+
+Omiti-los alteraria som, musica e cores do jogo — o que o escopo do projeto
+proibe explicitamente.
+
+### 4.3 Base factual
+
+- **Minecraft EULA**, secao de Mods: um mod e "something original that you or
+  someone else created that **doesn't contain a substantial part of our
+  copyrightable code or content**". Identificadores e valores hexadecimais nao
+  sao expressao autoral e nao constituem "parte substancial de conteudo
+  protejavel".
+- **Minecraft EULA**, secao Content: "We will however own things that are copies
+  (or substantial copies) or derivatives of our property". Este repositorio nao
+  contem copia nem copia substancial dos arquivos do jogo — contem um punhado
+  de valores factuais.
+- **Minecraft EULA**, resumo: "**Do not distribute or make commercial use of
+  anything we've made without our permission**". Nenhum asset e distribuido.
+
+### 4.4 Limitacao declarada
+
+Esta e uma leitura tecnica do texto das licencas, **nao um parecer juridico**.
+Quem mantiver o projeto deve confirmar a interpretacao com assessoria
+juridica antes de uma distribuicao comercial. Nao ha garantia de que a
+Mojang/Microsoft considere esta redistribuicao aceitavel.
+
+## 5. Marca
+
+Minecraft e uma marca registrada de seus respectivos titulares. Este projeto
+nao tem afiliacao, endosso ou aprovacao da Mojang Studios ou da Microsoft.
