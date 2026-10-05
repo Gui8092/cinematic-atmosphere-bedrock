@@ -556,6 +556,18 @@ foreach ($f in Get-ChildItem (Join-Path $pack 'fogs') -Filter *.json) {
         }
         $g2 = $fg.volumetric.henyey_greenstein_g.air.henyey_greenstein_g
         if ($null -ne $g2 -and ([double]$g2 -lt -1 -or [double]$g2 -gt 1)) { Fail "$($f.Name): henyey_greenstein_g fora de [-1,1]" }
+        # scattering/absorption sao coeficientes fisicos: o vanilla usa no maximo
+        # 0.5 (scattering, pale_garden/sulfur_cave) e 0.255 (absorption). [0,1]
+        # e um teto conservador — acima disso seria extremo e sem precedente.
+        $mc = $fg.volumetric.media_coefficients.air
+        if ($mc) {
+            foreach ($ch in @($mc.scattering)) {
+                if ([double]$ch -lt 0 -or [double]$ch -gt 1) { Fail "$($f.Name): media_coefficients.air.scattering = $ch fora de [0,1]" }
+            }
+            foreach ($ch in @($mc.absorption)) {
+                if ([double]$ch -lt 0 -or [double]$ch -gt 1) { Fail "$($f.Name): media_coefficients.air.absorption = $ch fora de [0,1]" }
+            }
+        }
         if ($null -ne $fg.volumetric.density.water -or $null -ne $fg.volumetric.density.lava) {
             Warn "$($f.Name): volumetric define agua/lava — confirme se e intencional"
         }
@@ -700,6 +712,20 @@ foreach ($f in Get-ChildItem $root -Recurse -Filter *.ps1 -File) {
 }
 if ($bomBad.Count -eq 0) { Ok "todos os $bomOk scripts .ps1 estao em UTF-8 COM BOM (obrigatorio para o PowerShell 5.1)" }
 else { Fail "sem BOM UTF-8 (o PowerShell 5.1 vai corromper acentos): $($bomBad -join ', ')" }
+
+# --- newline final: o .editorconfig exige insert_final_newline. Arquivos sem
+# LF final geram ruido ("\ No newline at end of file") nos diffs e indicam
+# edicao fora do padrao. 51 arquivos estavam sem, todos corrigidos de uma vez.
+# Usa Get-ChildItem em vez de git ls-files de proposito: o validador nao pode
+# depender de git (precisa rodar numa copia extraida sem repositorio).
+$cbaNlBad = @()
+foreach ($f in Get-ChildItem $root -Recurse -File -Include *.md, *.ps1, *.json) {
+    if ($f.FullName -match '[\\/]\.git[\\/]') { continue }
+    $bytes = [System.IO.File]::ReadAllBytes($f.FullName)
+    if ($bytes.Length -gt 0 -and $bytes[-1] -ne 10) { $cbaNlBad += $f.Name }
+}
+if ($cbaNlBad.Count -eq 0) { Ok 'todos os .md/.ps1/.json terminam com LF (editorconfig)' }
+else { Fail ("sem newline final: " + ($cbaNlBad -join ', ')) }
 
 # --- o .mcpack publicado precisa corresponder ao source
 # -SkipArtifact existe porque build.ps1 chama a validacao ANTES de empacotar.

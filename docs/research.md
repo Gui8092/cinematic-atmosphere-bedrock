@@ -282,13 +282,16 @@ original. Omitido conforme a instrução de não incluir caminhos não comprovad
 
 ### 7.2 `local_lighting/` — OMITIDO
 
-Documentação confirma o caminho (`local_lighting/local_lighting.json`,
-`format_version 1.21.120`, renomeado de `point_lights/global.json`), mas o
-**vanilla em 1.26.50.4 não tem a pasta** — não há precedente para confirmar
-vigência. Além disso, cada entrada precisaria redeclarar `light_type`, com risco
+O Learn da Mojang ("Light Sources", em `documents/vibrantvisuals/`) confirma o
+caminho (`local_lighting/local_lighting.json`, `format_version 1.21.120`,
+renomeado de `point_lights/global.json`), mas os 6 documentos oficiais do
+`bedrock-samples` **não mencionam o termo nenhuma vez** e o **vanilla em
+1.26.50.4 não tem a pasta** — não há precedente para confirmar vigência.
+Além disso, cada entrada precisaria redeclarar `light_type`, com risco
 de mudar a classificação de point lights que o jogo já define. O mesmo efeito
 estético (tom quente nas tochas) é obtido por `emissive.desaturation`, que é um
-campo validado do schema de `lighting` que já usamos.
+campo validado do schema de `lighting` que já usamos. A receita do `README.md`
+§5 **nunca foi executada dentro do jogo**.
 
 ### 7.3 `pbr/global.json` — OMITIDO
 

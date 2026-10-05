@@ -71,9 +71,16 @@ Verificação em 2026-10-05: o termo `local_lighting` **não aparece** em nenhum
 nem em `Lighting.html`, `Atmospherics.html`, `Fogs.html`, `Water.html`,
 `Schemas.html` nem `Client Biomes.html`.
 
-Ou seja: **o caminho não está documentado pelo Mojang.** Sem documentação e sem
-teste dentro do jogo, incluir um diretório inteiro cujo comportamento só se
-descobre ao executar seria trocar controle por esperança. Fica de fora.
+Correção posterior (mesmo dia): o caminho **é** documentado no Learn da Mojang,
+na página "Light Sources" (`documents/vibrantvisuals/lightingcustomization`):
+"`local_lighting/local_lighting.json` assigns light colors and light type to
+specific block types such as torches." A afirmação anterior de "não documentado"
+estava **imprecisa** — o correto é: documentado no Learn, ausente dos
+documentos do `bedrock-samples`, ausente do vanilla 1.26.50.4 e sem teste
+in-game neste projeto. A conclusão não muda: incluir um diretório inteiro cujo
+comportamento só se descobre ao executar seria trocar controle por esperança.
+Fica de fora, e a receita do `README.md` §5 passa a dizer explicitamente que
+nunca foi testada.
 
 ---
 

@@ -4,6 +4,86 @@ Todas as mudanças relevantes deste resource pack.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 Versionamento do pack segue SemVer no `manifest.json`.
 
+## [1.2.1] — 2026-10-05
+
+Caçada completa a bugs no projeto inteiro, com correções. Nada de arte alterada:
+nenhum valor visual mudou. O que mudou foi **documentação contraditória**,
+**higiene de arquivos** e **dois checks novos**.
+
+## Contradição sobre `local_lighting/` — corrigida em 4 documentos
+
+A v1.2.0 afirmou que `local_lighting/` "não aparece em nenhum documento oficial".
+Isso estava **impreciso**: o caminho **é** documentado no Learn da Mojang, página
+"Light Sources" (`documents/vibrantvisuals/lightingcustomization`):
+"*`local_lighting/local_lighting.json` assigns light colors and light type to
+specific block types such as torches.*"
+
+O que continua verdade: ausente dos 6 documentos do `bedrock-samples`, ausente
+do vanilla 1.26.50.4, e sem teste in-game neste projeto. A conclusão (ficar de
+fora) não muda, mas 4 documentos diziam coisas incompatíveis entre si:
+
+| Documento | Dizia | Agora diz |
+|---|---|---|
+| `README.md` §5 | "o caminho **foi validado** e a receita funciona" | documentado no Learn, **nunca testado neste projeto** — use por sua conta |
+| `docs/inventory.md` §5 | "**Path validado** (schema oficial...)" | documentado no Learn, sem precedente no vanilla, sem teste — omitido |
+| `docs/research.md` §7.2 | "Documentação confirma o caminho" | especifica **qual** documentação + as ressalvas |
+| `docs/scope-decisions.md` §2 | "não está documentado pelo Mojang" | correção explícita com a citação do Learn |
+
+"Foi validado e funciona" era uma alegação de validação in-game que nunca
+aconteceu — exatamente o tipo de afirmação que este projeto promete não fazer.
+
+## Contadores desatualizados — corrigidos
+
+- `README.md`: "**150 arquivos** (130 + 20)" → **152 (130 + 22)**.
+- `docs/inventory.md`: TOTAL 150 → **152**; `docs/` 4 → 5 documentos;
+  `tools/` 7 → 9; faltavam as linhas de `tools/water-report.ps1` e
+  `docs/scope-decisions.md`; "73 verificações" → **108** (`+2` com rede).
+
+## Newline final — 51 arquivos corrigidos, com check
+
+O `.editorconfig` exige `insert_final_newline`, mas 51 arquivos (40 `.json`,
+8 `.ps1`, 3 `.md`) não terminavam com LF. Todos corrigidos — mudança só de
+higiene, nenhum byte de configuração alterado. `validate.ps1` agora reprova
+arquivo sem LF final (testado nos dois sentidos).
+
+## Checks novos: scattering/absorption
+
+`media_coefficients.air.scattering` e `.absorption` não tinham faixa conferida.
+O vanilla usa no máximo 0.5 e 0.255; `[0,1]` é o teto conservador. Os valores do
+pack (scattering até 0.06, absorption 0.0) passam com folga — o check existe
+para que um valor absurdo não entre despercebido. Negativo injetado
+(`scattering = 1.8`) reprovado.
+
+## O que a caçada verificou e estava limpo
+
+- Caracteres não-ASCII dentro do pack: **0** (o parser do jogo é sensível).
+- Identificadores `cba:` duplicados: **0** (128 únicos).
+- Gerador de biomas: regeneração byte-idêntica dos 89 arquivos — determinístico
+  e em sincronia.
+- Diff v1.1.0→atual nos JSONs: só offsets zerados + `deep_ocean` 0.15→0.08 +
+  version bump. Nenhum dano colateral dos scripts de edição.
+- Trailing whitespace em `.ps1`/`.json`: **0**.
+- Blobs CRLF apesar de `eol=lf`: **0**.
+- Receitas do README vs valores atuais: todas conferem.
+- Sol à meia-noite = 0 em todas as famílias; lua 0.26–0.42 (vanilla 0.4);
+  `orbital_offset` uniforme 2.5.
+- Blocos lava/weather/water dos fogs: sãos; weather do vanilla tem a mesma
+  estrutura (ar 0.92→1.0, weather 0.23→0.7).
+- Ordenação de iluminância por família e tints de scattering por perfil:
+  coerentes.
+
+## Validação
+
+| Execução | Verificações | Falhas | Avisos |
+|---|---:|---:|---:|
+| `validate.ps1` (offline) | 108 | 0 | 0 |
+| `validate.ps1 -CheckOfficial` | 110 | 0 | 0 |
+| `test-negative.ps1` | 29 | 0 | 0 |
+
+Testes visuais e de desempenho continuam **não executados**.
+
+---
+
 ## [1.2.0] — 2026-10-05
 
 Auditoria contra a **documentação oficial do Mojang** e o sistema de água. Nenhuma

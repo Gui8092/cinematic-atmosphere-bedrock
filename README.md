@@ -132,8 +132,9 @@ Todos os valores são planos e reversíveis. Reinicie o mundo ou use
 
 ### Receita: cor de luz de tochas e lanternas
 
-Não é incluído no pack (mudaria a direção artística aprovada), mas o caminho
-**foi validado** e a receita funciona. Crie
+Não é incluído no pack (mudaria a direção artística aprovada). O caminho é
+documentado pelo Mojang (Learn, "Light Sources"), mas **nunca foi testado dentro
+do jogo neste projeto** — use por sua conta e risco. Crie
 `resource_pack\local_lighting\local_lighting.json`:
 
 ```json
@@ -190,7 +191,7 @@ Todas em PowerShell, **sem dependências externas**. O caminho padrão é
 **100% offline** — a única operação que acessa a rede é o `-SyncBaseline`.
 
 ```powershell
-.\tools\validate.ps1                        # 104 verificações estáticas (offline)
+.\tools\validate.ps1                        # 108 verificações estáticas (offline)
 .\tools\validate.ps1 -CheckOfficial         # + 2: compara com a referência oficial (requer internet)
 .\tools\validate.ps1 -SkipArtifact         # usado por build.ps1 antes de empacotar
 .\tools\fog-report.ps1                    # densidade de fog por altura vs vanilla
@@ -242,9 +243,9 @@ completa, com as categorias de conteúdo e as citações do EULA, está em
 
 | Categoria | Estado |
 |---|---|
-| Testes estáticos (sintaxe, manifesto, referências, versões, schemas, procedência, BOM, alcance do fog, água, artefato) | ✅ **Executados — 104 verificações, 0 falhas, 0 avisos** |
+| Testes estáticos (sintaxe, manifesto, referências, versões, schemas, procedência, BOM, alcance do fog, água, artefato) | ✅ **Executados — 108 verificações, 0 falhas, 0 avisos** |
 | Testes negativos do verificador de pacote | ✅ **Executados — 29 casos, 0 falhas** |
-| Comparação com a referência oficial (com rede) | ✅ **Executado — 109 verificações, inventário idêntico aos 89 biomas** |
+| Comparação com a referência oficial (com rede) | ✅ **Executado — 110 verificações, inventário idêntico aos 89 biomas** |
 | Empacotamento e estrutura do `.mcpack` | ✅ **Executado** — 130 entradas, `manifest.json` na raiz, SHA256 registrado |
 | **Testes visuais dentro do Minecraft** | ⏳ **NÃO executados** — exige acesso ao jogo e a hardware |
 | **Medição de desempenho / FPS** | ⏳ **NÃO executada** — nenhum número de FPS é alegado |
@@ -330,7 +331,7 @@ Detalhamento completo e fontes: [`docs/research.md`](docs/research.md) e
 └── dist\                    Cinematic_Atmosphere_Bedrock.mcpack
 ```
 
-**150 arquivos** no total (130 no pack + 20 de projeto).
+**152 arquivos** no total (130 no pack + 22 de projeto).
 
 ---
 

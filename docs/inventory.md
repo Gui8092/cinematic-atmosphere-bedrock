@@ -23,11 +23,11 @@ inventário **real** do projeto.
 | **Subtotal do `resource_pack/`** | **130** |
 | `README.md` + `CHANGELOG.md` | 2 |
 | `LICENSE` + `NOTICE` + `.gitignore` | 3 |
-| `docs/` (4 documentos) | 4 |
-| `tools/` (6 scripts + 1 baseline) | 7 |
+| `docs/` (5 documentos) | 5 |
+| `tools/` (8 scripts + 1 baseline) | 9 |
 | `dist/Cinematic_Atmosphere_Bedrock.mcpack` | 1 |
-| **Subtotal do projeto** | **20** |
-| **TOTAL** | **150** |
+| **Subtotal do projeto** | **22** |
+| **TOTAL** | **152** |
 
 Pacote empacotado: **130 entradas** (129 `.json` + 1 `.png`), confirmado por
 `tools\build.ps1` e `tools\verify-package.ps1`.
@@ -189,10 +189,12 @@ componentes vanilla fora do escopo visual: `minecraft:ambient_sounds`,
 | `biome-map.ps1` | Fonte única de verdade: identificadores, 16 famílias, versões aceitas por tipo, regra de cubemap, tag da referência | não |
 | `vanilla-baseline.json` | Baseline transcrito: `format_version` por bioma + componentes a preservar. Declara repositório, tag e licença | não |
 | `generate-biomes.ps1` | Gera os 89 arquivos a partir do mapa + baseline; `-SyncBaseline` reimporta a referência | só com `-SyncBaseline` |
-| `validate.ps1` | 73 verificações estáticas (`-CheckOfficial` adiciona 2) | não (opcional) |
+| `validate.ps1` | 108 verificações estáticas (`-CheckOfficial` adiciona 2) | não (opcional) |
 | `verify-package.ps1` | Verificação de segurança do `.mcpack`, **autônoma** | não |
 | `test-negative.ps1` | 29 testes negativos que provam que o verificador reprova | não |
-| `build.ps1` | Valida → empacota → verifica | não |
+| `fog-report.ps1` | Densidade do fog por altura e alcance em blocos vs vanilla | não |
+| `water-report.ps1` | Física dos perfis de água + tabela perfil × `surface_color` | não |
+| `build.ps1` | Valida → empacota → verifica o pacote → revalida com o artefato | não |
 
 Todos gravados em **UTF-8 com BOM** — obrigatório para o PowerShell 5.1
 decodificar corretamente os acentos.
@@ -209,6 +211,7 @@ decodificar corretamente os acentos.
 | `docs/compatibility.md` | Compatibilidade, riscos, estado dos testes, checklist visual |
 | `docs/art-direction.md` | Direção artística, curva de 24 h, split-tone, o caso das cavernas |
 | `docs/inventory.md` | Este documento |
+| `docs/scope-decisions.md` | Decisões de escopo com ganho e custo de cada alternativa (grama/folhagem em aberto) |
 
 ---
 
@@ -217,7 +220,7 @@ decodificar corretamente os acentos.
 | Item | Motivo | Prejudica o objetivo principal? |
 |---|---|---|
 | `shadows/` | A documentação diz `shadows/global.json`; um pack de exemplo diz `shadows/shadows.json`; o vanilla em 1.26.50.4 **não tem a pasta**. Sem caminho comprovado. O padrão do jogo já é `soft_shadows` | **Não** |
-| `local_lighting/` | **Path validado** (schema oficial + schema independente + template do Anvil + dezenas de packs reais). Omitido por **decisão artística**: incluir exigiria redeclarar `light_type` em cada entrada e mudaria a cor das tochas/lanternas, o que está fora da direção aprovada. Receita pronta no `README.md` §5 | **Não** |
+| `local_lighting/` | Documentado no Learn da Mojang ("Light Sources"), mas **ausente** dos 6 documentos oficiais do `bedrock-samples`, sem precedente no vanilla 1.26.50.4 e **sem teste in-game neste projeto**. Omitido por **decisão artística**: incluir exigiria redeclarar `light_type` em cada entrada e mudaria a cor das tochas/lanternas, o que está fora da direção aprovada. Receita não-testada no `README.md` §5 | **Não** |
 | `pbr/global.json` | Alteraria materiais de renderização — fora do escopo. O valor vanilla equivalente é um no-op | **Não** |
 | `waves` ligadas | Decisão artística aprovada: preserva a animação de textura original do Minecraft | **Não** — receita no `README.md` §5 |
 | Texturas / modelos / sons / UI | Fora do escopo por definição | **Não** |

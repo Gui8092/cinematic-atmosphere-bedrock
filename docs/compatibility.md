@@ -72,8 +72,8 @@ ativar o pack numa versão em que parte dos arquivos seria inerte.
 
 | Execução | Verificações | Falhas | Avisos |
 |---|---:|---:|---:|
-| `validate.ps1` (padrão, sem rede) | 104 | 0 | 0 |
-| `validate.ps1 -CheckOfficial` (com rede) | 109 | 0 | 0 |
+| `validate.ps1` (padrão, sem rede) | 108 | 0 | 0 |
+| `validate.ps1 -CheckOfficial` (com rede) | 110 | 0 | 0 |
 | `test-negative.ps1` | 29 | 0 | 0 |
 
 | Bloco | Cobre |
@@ -82,7 +82,7 @@ ativar o pack numa versão em que parte dos arquivos seria inerte.
 | `[B]` Manifesto | `format_version`, campos de `header`, UUIDs válidos e **distintos**, módulo `resources`, capability `pbr` |
 | `[C]` Referenciais e cobertura | Todo identificador referenciado **existe**; namespace `cba`; sem duplicados; arquivos reservados presentes; **cobertura em três lados** — mapa ↔ baseline ↔ disco, com contagens iguais; `format_version` de cada bioma **igual ao da referência**; componentes preservados **idênticos ao baseline**; **regra de cubemap explícita** (Overworld deve ter, Nether/End nunca); comparação opcional com a referência oficial viva |
 | `[D]` Versões | `format_version` por tipo de arquivo contra o conjunto aceito; distribuição por bioma; `min_engine_version` ≥ maior formato usado |
-| `[E]` Schemas | alcance da névoa em blocos por perfil; **saturação mínima da cor do sol por horário** (piso 150 no pôr do sol, 90 na hora dourada); **violeta do crepúsculo** (spread ≥ 60 e azul dominante em `0.361464`/`0.654508`); 4 parâmetros não interpoláveis; `waves.enabled == false`; `operator == aces`; ranges de `ambient`, `sky`, `caustics`, partículas, `biome_water_color_contribution`, `temperature`, `contrast`/`gain`/`gamma`/`offset`/`saturation`, `shadowsMax < highlightsMin`, `fog_start < fog_end`, `max_density`, `zero_density_height ≥ max_density_height`, `henyey_greenstein_g`; ciclos de keyframe |
+| `[E]` Schemas | alcance da névoa em blocos por perfil; **saturação mínima da cor do sol por horário** (piso 150 no pôr do sol, 90 na hora dourada); **violeta do crepúsculo** (spread ≥ 60 e azul dominante em `0.361464`/`0.654508`); 4 parâmetros não interpoláveis; `waves.enabled == false`; `operator == aces`; ranges de `ambient`, `sky`, `caustics`, partículas, `biome_water_color_contribution`, `temperature`, `contrast`/`gain`/`gamma`/`offset`/`saturation`, `shadowsMax < highlightsMin`, `fog_start < fog_end`, `max_density`, `zero_density_height ≥ max_density_height`, `henyey_greenstein_g`, `scattering`/`absorption` em [0,1]; ciclos de keyframe; newline final em `.md`/`.ps1`/`.json` (editorconfig) |
 | `[F]` Procedência | Ausência de pastas de textura/modelo/som/material; única mídia = `pack_icon.png`; nenhum som; nenhum script; baseline declara repositorio, tag e licença |
 
 `tools\verify-package.ps1` — **autônomo**, não depende do `validate.ps1`:
