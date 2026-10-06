@@ -92,12 +92,6 @@ function Format-CbaJson {
     return "{`n" + ($lines -join ",`n") + "`n$pad}"
 }
 
-function Set-Prop {
-    param($Object, [string]$Name, $Value)
-    if ($Object.PSObject.Properties.Name -contains $Name) { $Object.$Name = $Value }
-    else { $Object | Add-Member -NotePropertyName $Name -NotePropertyValue $Value }
-}
-
 # ---------------------------------------------------------------------------
 # -SyncBaseline: atualiza o baseline a partir da referencia fixada (requer rede)
 # ---------------------------------------------------------------------------
